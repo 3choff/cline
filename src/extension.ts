@@ -559,7 +559,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			GitCommitGenerator?.abort?.()
 		}),
 	)
-	
+
 	context.subscriptions.push(
 		context.secrets.onDidChange(async (event) => {
 			if (event.key === "clineAccountId") {
@@ -614,10 +614,11 @@ export async function activate(context: vscode.ExtensionContext) {
 					return
 				}
 
-			// 4. Telemetry
-			telemetryService.captureButtonClick("command_addPromptToChat", visibleWebview.controller.task?.taskId)
-		}),
+				await visibleWebview.controller.addPromptToChat(prompt, submit)
 
+				telemetryService.captureButtonClick("command_addPromptToChat", visibleWebview.controller.task?.taskId)
+			},
+		),
 	)
 
 	context.subscriptions.push(
@@ -660,7 +661,6 @@ export async function activate(context: vscode.ExtensionContext) {
 				// Call the controller with both arguments
 				await visibleWebview.controller.addFileMentionToChat(filePath, submit)
 
-				// Telemetry
 				telemetryService.captureButtonClick("command_addFileMentionToChat", visibleWebview.controller.task?.taskId)
 			},
 		),
