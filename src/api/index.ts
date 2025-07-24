@@ -8,6 +8,7 @@ import { OpenAiHandler } from "./providers/openai"
 import { OllamaHandler } from "./providers/ollama"
 import { LmStudioHandler } from "./providers/lmstudio"
 import { GeminiHandler } from "./providers/gemini"
+import { GeminiCliHandler } from "./providers/gemini-cli"
 import { OpenAiNativeHandler } from "./providers/openai-native"
 import { ApiStream, ApiStreamUsageChunk } from "./transform/stream"
 import { DeepSeekHandler } from "./providers/deepseek"
@@ -138,6 +139,12 @@ function createHandlerForProvider(
 					mode === "plan" ? options.planModeThinkingBudgetTokens : options.actModeThinkingBudgetTokens,
 				apiModelId: mode === "plan" ? options.planModeApiModelId : options.actModeApiModelId,
 				ulid: options.ulid,
+			})
+		case "gemini-cli":
+			return new GeminiCliHandler({
+				geminiCliOAuthPath: options.geminiCliOAuthPath,
+				geminiCliProjectId: options.geminiCliProjectId,
+				apiModelId: mode === "plan" ? options.planModeApiModelId : options.actModeApiModelId,
 			})
 		case "openai-native":
 			return new OpenAiNativeHandler({
