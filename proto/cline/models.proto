@@ -129,6 +129,7 @@ enum ApiProvider {
   CLAUDE_CODE = 26;
   MOONSHOT = 27;
   HUGGINGFACE = 28;
+  GEMINI_CLI = 29;
 }
 
 // Model info for OpenAI-compatible models
@@ -229,6 +230,8 @@ message ModelsApiConfiguration {
   optional string cline_account_id = 58;
   optional string groq_api_key = 59;
   optional string hugging_face_api_key = 60;
+  optional string gemini_cli_oauth_path = 61;
+  optional string gemini_cli_project_id = 62;
 
   // Plan mode configurations
   optional ApiProvider plan_mode_api_provider = 100;
