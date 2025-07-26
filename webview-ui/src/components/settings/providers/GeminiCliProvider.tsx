@@ -19,6 +19,10 @@ import { ModelInfoView } from "../common/ModelInfoView"
 import { normalizeApiConfiguration } from "../utils/providerUtils"
 import { Mode } from "@shared/ChatSettings"
 import { useApiConfigurationHandlers } from "../utils/useApiConfigurationHandlers"
+import ThinkingBudgetSlider from "../ThinkingBudgetSlider"
+
+// Gemini models that support thinking/reasoning mode
+const SUPPORTED_THINKING_MODELS = ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite-preview-06-17"]
 
 interface GeminiCliProviderProps {
 	apiConfiguration: ApiConfiguration
@@ -116,6 +120,10 @@ export const GeminiCliProvider = ({
 						}
 						label="Model"
 					/>
+
+					{SUPPORTED_THINKING_MODELS.includes(selectedModelId) && (
+						<ThinkingBudgetSlider maxBudget={selectedModelInfo.thinkingConfig?.maxBudget} currentMode={currentMode} />
+					)}
 
 					<ModelInfoView selectedModelId={selectedModelId} modelInfo={selectedModelInfo} isPopup={isPopup} />
 				</>

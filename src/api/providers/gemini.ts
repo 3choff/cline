@@ -24,24 +24,18 @@ interface GeminiHandlerOptions {
 }
 
 /**
- * Handler for Google's Gemini API with optimized caching strategy and accurate cost accounting.
+ * Handler for Google's Gemini API.
+ *
+ * This handler is designed to work with the implicit, server-side caching
+ * provided by the Google Gemini API. It does not implement its own client-side
+ * caching logic.
  *
  * Key features:
- * - One cache per task: Creates a single cache per task and reuses it for subsequent turns
- * - Stable cache keys: Uses ulid as a stable identifier for caches
- * - Efficient cache updates: Only updates caches when there's new content to add
- * - Split cost accounting: Separates immediate costs from ongoing cache storage costs
- *
- * Cost accounting approach:
- * - Immediate costs (per message): Input tokens, output tokens, and cache read costs
- * - Ongoing costs (per task): Cache storage costs for the TTL period
- *
- * Gemini's caching system is unique in that it charges for holding tokens in cache by the hour.
- * This implementation optimizes for both performance and cost by:
- * 1. Minimizing redundant cache creations
- * 2. Properly accounting for cache costs in the billing calculations
- * 3. Using a stable cache key to ensure cache reuse across turns
- * 4. Separating immediate costs from ongoing costs to avoid double-counting
+ * - Relies on the Gemini API's built-in prompt caching.
+ * - Accurately accounts for costs by differentiating between new tokens and
+ *   tokens served from the cache, based on the `usageMetadata` from the API response.
+ * - Supports "thinking" mode for compatible models, allowing the model's
+ *   reasoning process to be streamed back to the user.
  */
 export class GeminiHandler implements ApiHandler {
 	private options: GeminiHandlerOptions

@@ -54,6 +54,7 @@ interface GeminiCliHandlerOptions extends ApiHandlerOptions {
 	geminiCliOAuthPath?: string
 	geminiCliProjectId?: string
 	apiModelId?: string
+	thinkingBudgetTokens?: number
 }
 
 /**
@@ -300,7 +301,7 @@ export class GeminiCliHandler implements ApiHandler {
 		const { id: modelId, info: modelInfo } = this.getModel()
 
 		// Build the request
-		const streamRequest = {
+		const streamRequest: any = {
 			model: modelId,
 			project: projectId,
 			request: {
@@ -316,6 +317,14 @@ export class GeminiCliHandler implements ApiHandler {
 					// maxOutputTokens: modelInfo.maxTokens || 8192,
 				},
 			},
+		}
+
+		// Add thinking config if the model supports it
+		if (this.options.thinkingBudgetTokens && this.options.thinkingBudgetTokens > 0) {
+			streamRequest.request.generationConfig.thinkingConfig = {
+				thinkingBudget: this.options.thinkingBudgetTokens,
+				includeThoughts: true,
+			}
 		}
 
 		let totalContent = ""
@@ -340,14 +349,27 @@ export class GeminiCliHandler implements ApiHandler {
 			for await (const jsonData of this.parseSSEStream(response.data as Readable)) {
 				// Extract content from the response
 				const candidate = jsonData.response?.candidates?.[0]
-				if (candidate?.content?.parts?.[0]?.text) {
-					const content = candidate.content.parts[0].text
-					totalContent += content
+				const parts = candidate?.content?.parts
 
-					// Yield text chunk
-					yield {
-						type: "text",
-						text: content,
+				if (parts) {
+					let thoughts = ""
+					for (const part of parts) {
+						if (part.thought && part.text) {
+							thoughts += part.text + "\n"
+						} else if (part.text) {
+							const content = part.text
+							totalContent += content
+							yield {
+								type: "text",
+								text: content,
+							}
+						}
+					}
+					if (thoughts.trim() !== "") {
+						yield {
+							type: "reasoning",
+							reasoning: thoughts.trim(),
+						}
 					}
 				}
 
