@@ -312,8 +312,8 @@ export class GeminiCliHandler implements ApiHandler {
 					...contents,
 				],
 				generationConfig: {
-					temperature: 0.7,
-					maxOutputTokens: modelInfo.maxTokens || 8192,
+					temperature: 0, // Default temperature, original was 0.7
+					// maxOutputTokens: modelInfo.maxTokens || 8192,
 				},
 			},
 		}
