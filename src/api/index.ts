@@ -138,7 +138,8 @@ function createHandlerForProvider(
 				geminiCliOAuthPath: options.geminiCliOAuthPath,
 				geminiCliProjectId: options.geminiCliProjectId,
 				apiModelId: mode === "plan" ? options.planModeApiModelId : options.actModeApiModelId,
-				// Add other fields as needed for GeminiCliHandler
+				thinkingBudgetTokens:
+					mode === "plan" ? options.planModeThinkingBudgetTokens : options.actModeThinkingBudgetTokens,
 			})
 		case "openai-native":
 			return new OpenAiNativeHandler({
