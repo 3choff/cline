@@ -330,6 +330,7 @@ export class GeminiCliHandler implements ApiHandler {
 		let totalContent = ""
 		let promptTokens = 0
 		let outputTokens = 0
+		let cacheReadTokens = 0
 		let lastUsageMetadata: any = null
 
 		try {
@@ -378,6 +379,7 @@ export class GeminiCliHandler implements ApiHandler {
 					lastUsageMetadata = jsonData.response.usageMetadata
 					promptTokens = lastUsageMetadata.promptTokenCount || promptTokens
 					outputTokens = lastUsageMetadata.candidatesTokenCount || outputTokens
+					cacheReadTokens = lastUsageMetadata.cachedContentTokenCount || cacheReadTokens
 				}
 
 				// Check if this is the final chunk
@@ -390,8 +392,10 @@ export class GeminiCliHandler implements ApiHandler {
 			if (lastUsageMetadata) {
 				yield {
 					type: "usage",
-					inputTokens: promptTokens,
+					inputTokens: promptTokens - cacheReadTokens,
 					outputTokens: outputTokens,
+					cacheReadTokens: cacheReadTokens,
+					cacheWriteTokens: 0,
 					totalCost: 0, // Free tier
 				}
 			}
