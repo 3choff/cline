@@ -9,6 +9,7 @@ import { Anthropic } from "@anthropic-ai/sdk"
 import { buildApiHandler } from "@api/index"
 import { cleanupLegacyCheckpoints } from "@integrations/checkpoints/CheckpointMigration"
 import { downloadTask } from "@integrations/misc/export-markdown"
+import { processFilePaths } from "@integrations/misc/process-files"
 import WorkspaceTracker from "@integrations/workspace/WorkspaceTracker"
 import { ClineAccountService } from "@services/account/ClineAccountService"
 import { McpHub } from "@services/mcp/McpHub"
@@ -565,40 +566,42 @@ export class Controller {
 	}
 
 	/**
-	 * Adds a prompt to the chat input or submits it directly as a new task.
-	 * @param prompt The text to add or submit.
-	 * @param submit If true, the prompt is submitted immediately. Defaults to false.
+	 * Handles adding context (prompts, files) to the chat input or submitting it as a new task.
+	 * This is the unified internal method for all programmatic context additions.
+	 * @param args An object containing the context to add.
 	 */
-	async addPromptToChat(prompt: string, submit: boolean = false) {
-		await vscode.commands.executeCommand("claude-dev.SidebarProvider.focus")
-		await setTimeoutPromise(200)
+	public async sendToChat(args: {
+		prompt?: string
+		filePaths?: string[]
+		images?: string[] // New parameter
+		submit?: boolean
+	}) {
+		const { prompt = "", filePaths = [], images: imageDataUris = [], submit = false } = args
 
-		if (submit) {
-			await this.initTask(prompt)
-			console.log("addPromptToChat (submitted)", prompt)
+		// 1. Process file paths to separate images and other files
+		const { images: processedImages, files: otherFiles } = await processFilePaths(filePaths)
+		const allImages = [...imageDataUris, ...processedImages]
+
+		// 2. Convert non-image file paths to file mentions
+		const fileMentions = await Promise.all(otherFiles.map((path) => this.getFileMentionFromPath(path)))
+
+		// 3. Handle the two flows
+		if (submit || allImages.length > 0) {
+			// SUBMIT FLOW: If submitting or if there are any images, create a new task.
+			const taskPrompt = `${prompt} ${fileMentions.join(" ")}`.trim()
+			await this.initTask(taskPrompt, allImages, otherFiles)
+			console.log("sendToChat (submitted as new task)", {
+				taskPrompt,
+				images: allImages.length,
+				files: otherFiles.length,
+			})
 		} else {
-			await sendAddToInputEvent(prompt)
-			console.log("addPromptToChat (added to input)", prompt)
-		}
-	}
-
-	/**
-	 * Adds a file mention to the chat input or submits it directly as a new task.
-	 * @param filePath The absolute path to the file to mention.
-	 * @param submit If true, the mention is submitted immediately. Defaults to false.
-	 */
-	async addFileMentionToChat(filePath: string, submit: boolean = false) {
-		await vscode.commands.executeCommand("claude-dev.SidebarProvider.focus")
-		await setTimeoutPromise(200)
-
-		const fileMention = await this.getFileMentionFromPath(filePath)
-
-		if (submit) {
-			await this.initTask(fileMention)
-			console.log("addFileMentionToChat (submitted)", fileMention)
-		} else {
-			await sendAddToInputEvent(fileMention)
-			console.log("addFileMentionToChat (added to input)", fileMention)
+			// ADD TO INPUT FLOW: Only for text and file mentions (no images).
+			const fullInputText = `${prompt} ${fileMentions.join(" ")}`.trim()
+			if (fullInputText) {
+				await sendAddToInputEvent(fullInputText)
+				console.log("sendToChat (added to input)", fullInputText)
+			}
 		}
 	}
 

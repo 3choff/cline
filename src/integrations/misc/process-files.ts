@@ -29,11 +29,14 @@ export async function selectFiles(imagesAllowed: boolean): Promise<{ images: str
 		return { images: [], files: [] }
 	}
 
-	const processFilesPromises = fileUris.map(async (uri) => {
-		const filePath = uri.fsPath
-		const fileExtension = path.extname(filePath).toLowerCase().substring(1)
-		//const fileName = path.basename(filePath)
+	return processFilePaths(fileUris.map((uri) => uri.fsPath))
+}
 
+export async function processFilePaths(filePaths: string[]): Promise<{ images: string[]; files: string[] }> {
+	const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp"] // supported by anthropic and openrouter
+
+	const processFilesPromises = filePaths.map(async (filePath) => {
+		const fileExtension = path.extname(filePath).toLowerCase().substring(1)
 		const isImage = IMAGE_EXTENSIONS.includes(fileExtension)
 
 		if (isImage) {

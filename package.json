@@ -217,6 +217,11 @@
 				"command": "cline.addFileMentionToChat",
 				"title": "Add File Mention To Chat",
 				"category": "Cline"
+			},
+			{
+				"command": "cline.addFileToChat",
+				"title": "Add File To Chat",
+				"category": "Cline"
 			}
 		],
 		"keybindings": [
