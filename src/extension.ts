@@ -676,10 +676,22 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand(
 			"cline.addFileToChat",
 			async (args: { filePaths?: string[]; submit?: boolean } | undefined) => {
-				const { filePaths = [], submit = false } = args || {}
+				let { filePaths = [], submit = false } = args || {}
 
-				// Since this command is for attachments, we'll call sendToChat directly.
-				// The controller's sendToChat will handle processing the files.
+				if (filePaths.length === 0) {
+					// Interactive fallback: open file picker if no paths are provided
+					const selectedUris = (
+						await HostProvider.window.showOpenDialogue({
+							canSelectMany: true,
+							openLabel: "Select File(s) to Attach",
+						})
+					).paths
+
+					if (!selectedUris || selectedUris.length === 0) return // User cancelled
+					filePaths = selectedUris
+				}
+
+				// Call the controller's sendToChat method
 				const visibleWebview = WebviewProvider.getVisibleInstance()
 				if (visibleWebview) {
 					await visibleWebview.controller.sendToChat({ filePaths, submit })
