@@ -241,7 +241,7 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 		} catch (error) {
 			console.error("Error selecting images & files:", error)
 		}
-	}, [selectedModelInfo.supportsImages])
+	}, [selectedModelInfo.supportsImages, selectedImages, selectedFiles, setSelectedImages, setSelectedFiles])
 
 	const shouldDisableFilesAndImages = selectedImages.length + selectedFiles.length >= MAX_IMAGES_AND_FILES_PER_MESSAGE
 
@@ -297,7 +297,24 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 		})
 
 		return cleanup
-	}, [])
+	}, [setInputValue, textAreaRef])
+
+	// Set up triggerSelectFiles subscription
+	useEffect(() => {
+		const cleanup = UiServiceClient.subscribeToTriggerSelectFiles(EmptyRequest.create(), {
+			onResponse: () => {
+				selectFilesAndImages()
+			},
+			onError: (error) => {
+				console.error("Error in triggerSelectFiles subscription:", error)
+			},
+			onComplete: () => {
+				console.log("triggerSelectFiles subscription completed")
+			},
+		})
+
+		return cleanup
+	}, [selectFilesAndImages])
 
 	useMount(() => {
 		// NOTE: the vscode window needs to be focused for this to work

@@ -270,4 +270,7 @@ service UiService {
   
   // Opens the Cline walkthrough
   rpc openWalkthrough(EmptyRequest) returns (Empty);
+
+  // Triggers the file selection dialog in the webview
+  rpc subscribeToTriggerSelectFiles(EmptyRequest) returns (stream Empty);
 }

@@ -12,6 +12,7 @@ import { sendChatButtonClickedEvent } from "./core/controller/ui/subscribeToChat
 import { sendHistoryButtonClickedEvent } from "./core/controller/ui/subscribeToHistoryButtonClicked"
 import { sendMcpButtonClickedEvent } from "./core/controller/ui/subscribeToMcpButtonClicked"
 import { sendSettingsButtonClickedEvent } from "./core/controller/ui/subscribeToSettingsButtonClicked"
+import { sendAddToInputEvent } from "./core/controller/ui/subscribeToAddToInput"
 import { WebviewProvider } from "./core/webview"
 import { createClineAPI } from "./exports"
 import { Logger } from "./services/logging/Logger"
@@ -25,6 +26,7 @@ import { readTextFromClipboard, writeTextToClipboard } from "@/utils/env"
 import type { ExtensionContext } from "vscode"
 import { initialize, tearDown } from "./common"
 import { sendFocusChatInputEvent } from "./core/controller/ui/subscribeToFocusChatInput"
+import { sendTriggerSelectFilesEvent } from "./core/controller/ui/subscribeToTriggerSelectFiles"
 import { VscodeDiffViewProvider } from "./hosts/vscode/VscodeDiffViewProvider"
 import { VscodeWebviewProvider } from "./hosts/vscode/VscodeWebviewProvider"
 import { GitCommitGenerator } from "./integrations/git/commit-message-generator"
@@ -166,8 +168,24 @@ export async function activate(context: vscode.ExtensionContext) {
 			return
 		}
 
-		// 2. Call the single, unified method on the controller
-		await visibleWebview.controller.sendToChat(args)
+		// 2. Decide whether to submit or add to input
+		const { prompt = "", filePaths = [], submit = false } = args
+
+		if (submit) {
+			// If submitting, create the full prompt with file mentions and start a new task.
+			const fileMentions = await Promise.all(filePaths.map((p) => visibleWebview.controller.getFileMentionFromPath(p)))
+			const taskPrompt = `${prompt} ${fileMentions.join(" ")}`.trim()
+			await visibleWebview.controller.initTask(taskPrompt, [], filePaths)
+		} else {
+			// If not submitting, just add the text and file mentions to the input.
+			const fileMentions = await Promise.all(filePaths.map((p) => visibleWebview.controller.getFileMentionFromPath(p)))
+			const fullInputText = `${prompt} ${fileMentions.join(" ")}`.trim()
+
+			if (fullInputText) {
+				// Use the existing event to add text to the input.
+				await sendAddToInputEvent(fullInputText)
+			}
+		}
 
 		// 3. Telemetry (centralized)
 		const eventName = args.filePaths && args.filePaths.length > 0 ? "command_addFileMention" : "command_addPrompt"
@@ -675,31 +693,23 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
 			"cline.addFileToChat",
-			async (args: { filePaths?: string[]; submit?: boolean } | undefined) => {
-				let { filePaths = [], submit = false } = args || {}
-
-				if (filePaths.length === 0) {
-					// Interactive fallback: open file picker if no paths are provided
-					const selectedUris = (
-						await HostProvider.window.showOpenDialogue({
-							canSelectMany: true,
-							openLabel: "Select File(s) to Attach",
-						})
-					).paths
-
-					if (!selectedUris || selectedUris.length === 0) return // User cancelled
-					filePaths = selectedUris
-				}
-
-				// Call the controller's sendToChat method
+			async (args: { filePath?: string; submit?: boolean } | undefined) => {
 				const visibleWebview = WebviewProvider.getVisibleInstance()
-				if (visibleWebview) {
-					await visibleWebview.controller.sendToChat({ filePaths, submit })
-				} else {
+				if (!visibleWebview) {
 					HostProvider.window.showMessage({
 						type: ShowMessageType.ERROR,
 						message: "Could not find an active Cline chat window.",
 					})
+					return
+				}
+
+				if (args?.filePath) {
+					// Case 1: File path is provided.
+					// Use the new addFileMentionToChat method on the controller.
+					await visibleWebview.controller.addFileMentionToChat(args.filePath, args.submit ?? false)
+				} else {
+					// Case 2: No file path, trigger the interactive file picker.
+					await sendTriggerSelectFilesEvent()
 				}
 			},
 		),

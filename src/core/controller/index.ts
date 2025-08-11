@@ -566,42 +566,22 @@ export class Controller {
 	}
 
 	/**
-	 * Handles adding context (prompts, files) to the chat input or submitting it as a new task.
-	 * This is the unified internal method for all programmatic context additions.
-	 * @param args An object containing the context to add.
+	 * Adds a file mention to the chat input or submits it directly as a new task.
+	 * @param filePath The absolute path to the file to mention.
+	 * @param submit If true, the mention is submitted immediately. Defaults to false.
 	 */
-	public async sendToChat(args: {
-		prompt?: string
-		filePaths?: string[]
-		images?: string[] // New parameter
-		submit?: boolean
-	}) {
-		const { prompt = "", filePaths = [], images: imageDataUris = [], submit = false } = args
+	async addFileMentionToChat(filePath: string, submit: boolean = false) {
+		await vscode.commands.executeCommand("claude-dev.SidebarProvider.focus")
+		await setTimeoutPromise(200)
 
-		// 1. Process file paths to separate images and other files
-		const { images: processedImages, files: otherFiles } = await processFilePaths(filePaths)
-		const allImages = [...imageDataUris, ...processedImages]
+		const fileMention = await this.getFileMentionFromPath(filePath)
 
-		// 2. Convert non-image file paths to file mentions
-		const fileMentions = await Promise.all(otherFiles.map((path) => this.getFileMentionFromPath(path)))
-
-		// 3. Handle the two flows
-		if (submit || allImages.length > 0) {
-			// SUBMIT FLOW: If submitting or if there are any images, create a new task.
-			const taskPrompt = `${prompt} ${fileMentions.join(" ")}`.trim()
-			await this.initTask(taskPrompt, allImages, otherFiles)
-			console.log("sendToChat (submitted as new task)", {
-				taskPrompt,
-				images: allImages.length,
-				files: otherFiles.length,
-			})
+		if (submit) {
+			await this.initTask(fileMention)
+			console.log("addFileMentionToChat (submitted)", fileMention)
 		} else {
-			// ADD TO INPUT FLOW: Only for text and file mentions (no images).
-			const fullInputText = `${prompt} ${fileMentions.join(" ")}`.trim()
-			if (fullInputText) {
-				await sendAddToInputEvent(fullInputText)
-				console.log("sendToChat (added to input)", fullInputText)
-			}
+			await sendAddToInputEvent(fileMention)
+			console.log("addFileMentionToChat (added to input)", fileMention)
 		}
 	}
 
