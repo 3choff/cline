@@ -566,20 +566,15 @@ export class Controller {
 		console.log("fixWithCline", code, filePath, languageId, diagnostics, problemsString)
 	}
 
-	/**
-	 * Adds a prompt to the chat input or submits it directly as a new task.
-	 * @param prompt The text to add or submit.
-	 * @param submit If true, the prompt is submitted immediately. Defaults to false.
-	 */
-	async addPromptToChat(prompt: string, submit: boolean = false) {
+	public async dispatchChatAction(formattedText: string, submit: boolean = false) {
 		await vscode.commands.executeCommand("claude-dev.SidebarProvider.focus")
 		await setTimeoutPromise(200)
 
 		if (submit) {
-			await this.initTask(prompt)
+			await this.initTask(formattedText)
 			console.log("addPromptToChat (submitted)", prompt)
 		} else {
-			await sendAddToInputEvent(prompt)
+			await sendAddToInputEvent(formattedText)
 			console.log("addPromptToChat (added to input)", prompt)
 		}
 	}

@@ -1,15 +1,25 @@
 import * as vscode from "vscode"
 import pWaitFor from "p-wait-for"
-import { Controller } from "../controller"
-import { WebviewProvider } from "../webview"
+import { Controller } from ".." // Adjust path if needed
+import { WebviewProvider } from "../../webview"
 import { HostProvider } from "@/hosts/host-provider"
 import { ShowMessageType } from "@/shared/proto/host/window"
+import { sendFocusChatInputEvent } from "../ui/subscribeToFocusChatInput" // Add this new import
 
+/**
+ * Ensures a Cline webview is visible and ready, then returns its controller.
+ * This function is the single source of truth for activating and finding the correct webview.
+ * @returns The active Controller instance if a view is found/focused, otherwise null.
+ */
 export async function ensureClineViewIsVisible(): Promise<Controller | null> {
+	// 1. Trigger the focus command to activate the sidebar or a tab.
 	await vscode.commands.executeCommand("cline.focusChatInput")
 
+	// 2. Get the last active webview instance.
+	const activeWebview = WebviewProvider.getLastActiveInstance()
+
+	// 3. Wait for it to become available.
 	try {
-		// Use getLastActiveInstance in the check as well
 		await pWaitFor(() => !!WebviewProvider.getLastActiveInstance(), { timeout: 3000 })
 	} catch (error) {
 		console.error("Timeout waiting for Cline webview to become available.", error)
@@ -20,8 +30,9 @@ export async function ensureClineViewIsVisible(): Promise<Controller | null> {
 		return null
 	}
 
-	const activeWebview = WebviewProvider.getLastActiveInstance()
-	if (!activeWebview) {
+	// 4. Double-check and get the client ID.
+	const clientId = activeWebview?.getClientId()
+	if (!activeWebview || !clientId) {
 		HostProvider.window.showMessage({
 			type: ShowMessageType.ERROR,
 			message: "Could not find an active Cline chat window.",
@@ -29,6 +40,10 @@ export async function ensureClineViewIsVisible(): Promise<Controller | null> {
 		return null
 	}
 
+	// 5. Explicitly send the focus event to the webview UI.
+	await sendFocusChatInputEvent(clientId)
+
+	// 6. Return the controller.
 	return activeWebview.controller
 }
 

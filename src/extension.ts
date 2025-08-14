@@ -18,7 +18,6 @@ import { Logger } from "./services/logging/Logger"
 import { cleanupTestMode, initializeTestMode } from "./services/test/TestMode"
 import { WebviewProviderType } from "./shared/webview/types"
 import "./utils/path" // necessary to have access to String.prototype.toPosix
-import * as CommandHelpers from "./core/commands/command-helpers"
 
 import { HostProvider } from "@/hosts/host-provider"
 import { vscodeHostBridgeClient } from "@/hosts/vscode/hostbridge/client/host-grpc-client"
@@ -34,7 +33,10 @@ import { telemetryService } from "./services/posthog/PostHogClientProvider"
 import { SharedUriHandler } from "./services/uri/SharedUriHandler"
 import { ShowMessageType } from "./shared/proto/host/window"
 import { AuthHandler } from "./hosts/external/AuthHandler"
+import * as CommandHelpers from "./core/controller/commands/command-helpers"
 import { addToCline } from "./core/controller/commands/addToCline"
+import { addPromptToChat } from "./core/controller/commands/addPromptToChat"
+import { addFileMentionToChat } from "./core/controller/commands/addFileMentionToChat"
 import { FileDiagnostics } from "./shared/proto/index.cline"
 import { convertToFileDiagnostics, convertVscodeDiagnostics } from "./hosts/vscode/hostbridge/workspace/getDiagnostics"
 /*
@@ -245,20 +247,16 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand(
 			"cline.addToChat",
 			async (range?: vscode.Range, vscodeDiagnostics?: vscode.Diagnostic[]) => {
-				await vscode.commands.executeCommand("cline.focusChatInput") // Ensure Cline is visible and input focused
-
-				const activeWebview = WebviewProvider.getLastActiveInstance()
-				await pWaitFor(() => !!activeWebview)
-				const clientId = activeWebview?.getClientId()
-				if (!activeWebview || !clientId) {
-					return
+				const controller = await CommandHelpers.ensureClineViewIsVisible()
+				if (!controller) {
+					return // Helper handles showing the error message
 				}
+
+				// Logic specific to addToChat
 				const editor = vscode.window.activeTextEditor
 				if (!editor) {
 					return
 				}
-
-				await sendFocusChatInputEvent(clientId)
 
 				// Use provided range if available, otherwise use current selection
 				// (vscode command passes an argument in the first param by default, so we need to ensure it's a Range object)
@@ -274,7 +272,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				const language = editor.document.languageId
 				const diagnostics = convertVscodeDiagnostics(vscodeDiagnostics || [])
 
-				await addToCline(activeWebview.controller, { filePath, selectedText, language, diagnostics })
+				await addToCline(controller, { filePath, selectedText, language, diagnostics })
 			},
 		),
 	)
@@ -623,18 +621,16 @@ export async function activate(context: vscode.ExtensionContext) {
 					if (!prompt) return // User cancelled
 				}
 
-				// --- REFACTORED LOGIC USING THE HELPER ---
-				// Step 1: Get the controller using the new helper.
 				const controller = await CommandHelpers.ensureClineViewIsVisible()
 				if (!controller) {
-					return // The helper already showed an error message.
+					return
 				}
 
-				// Step 2: Call the controller method.
-				await controller.addPromptToChat(prompt, submit)
-
-				// Step 3: Telemetry.
-				telemetryService.captureButtonClick("command_addPromptToChat", controller.task?.ulid)
+				// 2. Make the gRPC call.
+				await addPromptToChat(controller, {
+					prompt: prompt,
+					submit: submit,
+				})
 			},
 		),
 	)
@@ -667,26 +663,16 @@ export async function activate(context: vscode.ExtensionContext) {
 					filePath = fileUris[0] // Removed non-null assertion as it should be a string now
 				}
 
-				// Step 1: Get the controller.
 				const controller = await CommandHelpers.ensureClineViewIsVisible()
 				if (!controller) {
 					return
 				}
 
-				// Step 2: Define the context object.
-				const context: CommandHelpers.CommandContext = {
+				// 2. Make the gRPC call with the gathered information.
+				await addFileMentionToChat(controller, {
 					filePath: filePath,
-				}
-
-				// Step 3: Format the context into the final string.
-				const formattedText = await CommandHelpers.formatContext(context, controller)
-
-				// Step 4: Call the controller with the formatted text.
-				// We use addPromptToChat as our unified controller method for adding text.
-				await controller.addPromptToChat(formattedText, submit)
-
-				// Step 5: Telemetry.
-				telemetryService.captureButtonClick("command_addFileMentionToChat", controller.task?.ulid)
+					submit: submit,
+				})
 			},
 		),
 	)
