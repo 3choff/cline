@@ -18,6 +18,7 @@ import { Logger } from "./services/logging/Logger"
 import { cleanupTestMode, initializeTestMode } from "./services/test/TestMode"
 import { WebviewProviderType } from "./shared/webview/types"
 import "./utils/path" // necessary to have access to String.prototype.toPosix
+import * as CommandHelpers from "./core/commands/command-helpers"
 
 import { HostProvider } from "@/hosts/host-provider"
 import { vscodeHostBridgeClient } from "@/hosts/vscode/hostbridge/client/host-grpc-client"
@@ -607,37 +608,33 @@ export async function activate(context: vscode.ExtensionContext) {
 					prompt = args
 				} else if (typeof args === "object" && args !== null) {
 					prompt = args.prompt
-					submit = !!args.submit // Coerce to boolean
+					submit = !!args.submit
 				}
 
 				// Interactive fallback if no prompt was provided
 				if (!prompt) {
 					prompt = (
 						await HostProvider.window.showInputBox({
-							title: "Enter Prompt", // Added missing title property
-							prompt: "Enter the prompt to send to Cline",
-							value: "e.g., Explain this code",
+							title: "Enter Prompt", // A title is good practice
+							prompt: "Enter the prompt to send to Cline", // This is the message above the input box
+							value: "e.g., Explain this code", // This pre-fills the input box
 						})
 					).response
-					if (!prompt) return
+					if (!prompt) return // User cancelled
 				}
 
-				// Get the currently active/visible Cline webview instance.
-				await vscode.commands.executeCommand("cline.focusChatInput")
-				await pWaitFor(() => !!WebviewProvider.getVisibleInstance())
-
-				const visibleWebview = WebviewProvider.getVisibleInstance()
-				if (!visibleWebview) {
-					HostProvider.window.showMessage({
-						type: ShowMessageType.ERROR,
-						message: "Could not find an active Cline chat window.",
-					})
-					return
+				// --- REFACTORED LOGIC USING THE HELPER ---
+				// Step 1: Get the controller using the new helper.
+				const controller = await CommandHelpers.ensureClineViewIsVisible()
+				if (!controller) {
+					return // The helper already showed an error message.
 				}
 
-				await visibleWebview.controller.addPromptToChat(prompt, submit)
+				// Step 2: Call the controller method.
+				await controller.addPromptToChat(prompt, submit)
 
-				telemetryService.captureButtonClick("command_addPromptToChat", visibleWebview.controller.task?.taskId)
+				// Step 3: Telemetry.
+				telemetryService.captureButtonClick("command_addPromptToChat", controller.task?.ulid)
 			},
 		),
 	)
