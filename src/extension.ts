@@ -667,23 +667,26 @@ export async function activate(context: vscode.ExtensionContext) {
 					filePath = fileUris[0] // Removed non-null assertion as it should be a string now
 				}
 
-				// Get the active Cline webview instance.
-				await vscode.commands.executeCommand("cline.focusChatInput")
-				await pWaitFor(() => !!WebviewProvider.getVisibleInstance())
-
-				const visibleWebview = WebviewProvider.getVisibleInstance()
-				if (!visibleWebview) {
-					HostProvider.window.showMessage({
-						type: ShowMessageType.ERROR,
-						message: "Could not find an active Cline chat window.",
-					})
+				// Step 1: Get the controller.
+				const controller = await CommandHelpers.ensureClineViewIsVisible()
+				if (!controller) {
 					return
 				}
 
-				// Call the controller with both arguments
-				await visibleWebview.controller.addFileMentionToChat(filePath, submit)
+				// Step 2: Define the context object.
+				const context: CommandHelpers.CommandContext = {
+					filePath: filePath,
+				}
 
-				telemetryService.captureButtonClick("command_addFileMentionToChat", visibleWebview.controller.task?.taskId)
+				// Step 3: Format the context into the final string.
+				const formattedText = await CommandHelpers.formatContext(context, controller)
+
+				// Step 4: Call the controller with the formatted text.
+				// We use addPromptToChat as our unified controller method for adding text.
+				await controller.addPromptToChat(formattedText, submit)
+
+				// Step 5: Telemetry.
+				telemetryService.captureButtonClick("command_addFileMentionToChat", controller.task?.ulid)
 			},
 		),
 	)
