@@ -35,8 +35,6 @@ import { ShowMessageType } from "./shared/proto/host/window"
 import { AuthHandler } from "./hosts/external/AuthHandler"
 import * as CommandHelpers from "./core/controller/commands/command-helpers"
 import { addToCline } from "./core/controller/commands/addToCline"
-import { addPromptToChat } from "./core/controller/commands/addPromptToChat"
-import { addFileMentionToChat } from "./core/controller/commands/addFileMentionToChat"
 import { FileDiagnostics } from "./shared/proto/index.cline"
 import { convertToFileDiagnostics, convertVscodeDiagnostics } from "./hosts/vscode/hostbridge/workspace/getDiagnostics"
 /*
@@ -272,7 +270,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				const language = editor.document.languageId
 				const diagnostics = convertVscodeDiagnostics(vscodeDiagnostics || [])
 
-				await addToCline(controller, { filePath, selectedText, language, diagnostics })
+				await addToCline(controller, { selectedText, filePath, language, diagnostics, submit: false })
 			},
 		),
 	)
@@ -596,40 +594,39 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
-			"cline.addPromptToChat",
-			async (args: string | { prompt: string; submit?: boolean } | undefined) => {
-				let prompt: string | undefined
-				let submit: boolean = false
+			"cline.sendContextToChat",
+			async (args: { prompt?: string; filePath?: string; submit?: boolean } | undefined) => {
+				// 1. Correctly parse the arguments at the beginning.
+				// Use optional chaining for safety in case 'args' is undefined.
+				let prompt = args?.prompt
+				let filePath = args?.filePath
+				let submit = !!args?.submit
 
-				// Determine the prompt and submit flag from the arguments
-				if (typeof args === "string") {
-					prompt = args
-				} else if (typeof args === "object" && args !== null) {
-					prompt = args.prompt
-					submit = !!args.submit
-				}
-
-				// Interactive fallback if no prompt was provided
-				if (!prompt) {
+				// 2. Interactive fallback ONLY if no context was provided at all.
+				// This assumes the command is called with either a prompt, a file, or interactively.
+				if (!prompt && !filePath) {
 					prompt = (
 						await HostProvider.window.showInputBox({
-							title: "Enter Prompt", // A title is good practice
-							prompt: "Enter the prompt to send to Cline", // This is the message above the input box
-							value: "e.g., Explain this code", // This pre-fills the input box
+							title: "Enter Prompt",
+							prompt: "Enter the prompt to send to Cline",
+							value: "e.g., Explain this code",
 						})
 					).response
 					if (!prompt) return // User cancelled
 				}
 
+				// 3. Get the active controller.
 				const controller = await CommandHelpers.ensureClineViewIsVisible()
 				if (!controller) {
 					return
 				}
 
-				// 2. Make the gRPC call.
-				await addPromptToChat(controller, {
+				// 4. Make the gRPC call using the correctly parsed variables.
+				await addToCline(controller, {
 					prompt: prompt,
+					filePath: filePath,
 					submit: submit,
+					diagnostics: [], // Provide the required empty array
 				})
 			},
 		),
@@ -669,9 +666,10 @@ export async function activate(context: vscode.ExtensionContext) {
 				}
 
 				// 2. Make the gRPC call with the gathered information.
-				await addFileMentionToChat(controller, {
+				await addToCline(controller, {
 					filePath: filePath,
 					submit: submit,
+					diagnostics: [],
 				})
 			},
 		),

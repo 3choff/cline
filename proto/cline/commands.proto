@@ -12,8 +12,6 @@ option java_multiple_files = true;
 // because they are triggered by interactions in the IDE.
 service CommandsService {
   rpc addToCline(AddToClineRequest) returns (Empty);
-  rpc addPromptToChat(AddPromptToChatRequest) returns (Empty);
-  rpc addFileMentionToChat(AddFileMentionToChatRequest) returns (Empty);
 }
 
 message AddToClineRequest {
@@ -25,14 +23,7 @@ message AddToClineRequest {
   optional string language = 3;
   // Any diagnostic problems for the current file.
   repeated cline.Diagnostic diagnostics = 4;
-}
-
-message AddPromptToChatRequest {
-  string prompt = 1;
-  optional bool submit = 2;
-}
-
-message AddFileMentionToChatRequest {
-  string file_path = 1;
-  optional bool submit = 2;
+  optional string prompt = 5; 
+  // A flag to indicate if the context should be submitted immediately.
+  optional bool submit = 6;
 }

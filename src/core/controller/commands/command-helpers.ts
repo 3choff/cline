@@ -4,7 +4,8 @@ import { Controller } from ".." // Adjust path if needed
 import { WebviewProvider } from "../../webview"
 import { HostProvider } from "@/hosts/host-provider"
 import { ShowMessageType } from "@/shared/proto/host/window"
-import { sendFocusChatInputEvent } from "../ui/subscribeToFocusChatInput" // Add this new import
+import { sendFocusChatInputEvent } from "../ui/subscribeToFocusChatInput"
+import { Diagnostic, DiagnosticSeverity } from "@/shared/proto/index.cline"
 
 /**
  * Ensures a Cline webview is visible and ready, then returns its controller.
@@ -55,7 +56,7 @@ export interface CommandContext {
 	filePath?: string
 	codeSelection?: { text: string; languageId: string }
 	terminalOutput?: string
-	diagnostics?: vscode.Diagnostic[]
+	diagnostics?: Diagnostic[]
 }
 
 /**
@@ -94,23 +95,26 @@ export async function formatContext(context: CommandContext, controller: Control
 		let problemsString = "Problems:\n"
 		for (const diagnostic of context.diagnostics) {
 			let label: string
+			// Use the Protobuf DiagnosticSeverity enum
 			switch (diagnostic.severity) {
-				case vscode.DiagnosticSeverity.Error:
+				case DiagnosticSeverity.DIAGNOSTIC_ERROR:
 					label = "Error"
 					break
-				case vscode.DiagnosticSeverity.Warning:
+				case DiagnosticSeverity.DIAGNOSTIC_WARNING:
 					label = "Warning"
 					break
-				case vscode.DiagnosticSeverity.Information:
+				case DiagnosticSeverity.DIAGNOSTIC_INFORMATION:
 					label = "Info"
 					break
-				case vscode.DiagnosticSeverity.Hint:
+				case DiagnosticSeverity.DIAGNOSTIC_HINT:
 					label = "Hint"
 					break
 				default:
 					label = "Diagnostic"
 			}
-			const line = diagnostic.range.start.line + 1
+
+			// Safely access the line number, defaulting to 0 if range or start is missing
+			const line = (diagnostic.range?.start?.line || 0) + 1
 			const source = diagnostic.source ? `[${diagnostic.source}] ` : ""
 			problemsString += `- ${source}${label} on line ${line}: ${diagnostic.message}\n`
 		}
