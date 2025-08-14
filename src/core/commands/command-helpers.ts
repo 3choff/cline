@@ -1,24 +1,18 @@
 import * as vscode from "vscode"
 import pWaitFor from "p-wait-for"
-import { Controller } from "../controller" // Note: Adjust the import path if the controller's index is in a different location
-import { WebviewProvider } from "../webview" // Note: Adjust the import path if necessary
+import { Controller } from "../controller"
+import { WebviewProvider } from "../webview"
 import { HostProvider } from "@/hosts/host-provider"
 import { ShowMessageType } from "@/shared/proto/host/window"
 
-/**
- * Ensures a Cline webview (either sidebar or a tab) is visible and ready for interaction.
- * It will focus an existing view or open a new one if necessary.
- * @returns The active Controller instance if a view becomes ready, otherwise null.
- */
 export async function ensureClineViewIsVisible(): Promise<Controller | null> {
-	// This uses the robust logic from the existing `cline.focusChatInput` command.
 	await vscode.commands.executeCommand("cline.focusChatInput")
 
 	try {
-		// Wait for the provider to become active and registered.
-		await pWaitFor(() => !!WebviewProvider.getVisibleInstance(), { timeout: 3000 })
+		// Use getLastActiveInstance in the check as well
+		await pWaitFor(() => !!WebviewProvider.getLastActiveInstance(), { timeout: 3000 })
 	} catch (error) {
-		console.error("Timeout waiting for Cline webview to become visible.", error)
+		console.error("Timeout waiting for Cline webview to become available.", error)
 		HostProvider.window.showMessage({
 			type: ShowMessageType.ERROR,
 			message: "Could not activate Cline view. Please try opening it manually.",
@@ -26,8 +20,8 @@ export async function ensureClineViewIsVisible(): Promise<Controller | null> {
 		return null
 	}
 
-	const visibleWebview = WebviewProvider.getVisibleInstance()
-	if (!visibleWebview) {
+	const activeWebview = WebviewProvider.getLastActiveInstance()
+	if (!activeWebview) {
 		HostProvider.window.showMessage({
 			type: ShowMessageType.ERROR,
 			message: "Could not find an active Cline chat window.",
@@ -35,8 +29,7 @@ export async function ensureClineViewIsVisible(): Promise<Controller | null> {
 		return null
 	}
 
-	// Return the controller for the now-visible webview.
-	return visibleWebview.controller
+	return activeWebview.controller
 }
 
 /**
@@ -109,6 +102,5 @@ export async function formatContext(context: CommandContext, controller: Control
 		parts.push(problemsString.trim())
 	}
 
-	// Join all the parts with a double newline for clean separation.
 	return parts.join("\n\n")
 }
