@@ -36,6 +36,13 @@ import QuoteButton from "./QuoteButton"
 import ReportBugPreview from "./ReportBugPreview"
 import SearchResultsDisplay from "./SearchResultsDisplay"
 import UserMessage from "./UserMessage"
+import CreditLimitError from "./CreditLimitError"
+
+declare global {
+	interface Window {
+		UiServiceClient?: any // Use the correct type if you know it, otherwise 'any'
+	}
+}
 
 const normalColor = "var(--vscode-foreground)"
 const errorColor = "var(--vscode-errorForeground)"
@@ -935,12 +942,136 @@ export const ChatRowContent = memo(
 									<span className={`codicon codicon-chevron-${isExpanded ? "up" : "down"}`}></span>
 								</div>
 								{((cost == null && apiRequestFailedMessage) || apiReqStreamingFailedMessage) && (
-									<ErrorRow
-										apiReqStreamingFailedMessage={apiReqStreamingFailedMessage}
-										apiRequestFailedMessage={apiRequestFailedMessage}
-										errorType="error"
-										message={message}
-									/>
+									<>
+										{(() => {
+											// Try to parse the error message as JSON for credit limit error
+											let errorData: any = undefined
+											try {
+												errorData = apiRequestFailedMessage
+													? JSON.parse(apiRequestFailedMessage)
+													: undefined
+											} catch {
+												// Intentionally empty: ignore JSON parse errors
+											}
+											if (
+												errorData &&
+												errorData.code === "insufficient_credits" &&
+												typeof errorData.current_balance === "number" &&
+												typeof errorData.total_spent === "number" &&
+												typeof errorData.total_promotions === "number" &&
+												typeof errorData.message === "string"
+											) {
+												return (
+													<CreditLimitError
+														currentBalance={errorData.current_balance}
+														totalSpent={errorData.total_spent}
+														totalPromotions={errorData.total_promotions}
+														message={errorData.message}
+													/>
+												)
+											}
+
+											// Check for rate limit errors (status code 429)
+											const isRateLimitError =
+												apiRequestFailedMessage?.includes("status code 429") ||
+												apiRequestFailedMessage?.toLowerCase().includes("rate limit") ||
+												apiRequestFailedMessage?.toLowerCase().includes("too many requests") ||
+												apiRequestFailedMessage?.toLowerCase().includes("quota exceeded") ||
+												apiRequestFailedMessage?.toLowerCase().includes("resource exhausted")
+
+											// Access apiConfiguration from useExtensionState
+											// (already in scope as per outline)
+											const isGeminiCliProvider =
+												(apiConfiguration as { apiProvider?: string })?.apiProvider === "gemini-cli"
+
+											if (isRateLimitError) {
+												if (isGeminiCliProvider) {
+													return (
+														<div
+															style={{
+																backgroundColor: "rgba(255, 191, 0, 0.1)",
+																padding: "12px",
+																borderRadius: "4px",
+																border: "1px solid rgba(255, 191, 0, 0.3)",
+															}}>
+															<div
+																style={{
+																	display: "flex",
+																	alignItems: "center",
+																	marginBottom: "8px",
+																}}>
+																<i
+																	className="codicon codicon-warning"
+																	style={{
+																		marginRight: "8px",
+																		fontSize: "16px",
+																		color: "#FFA500",
+																	}}></i>
+																<span
+																	style={{
+																		fontWeight: "bold",
+																		color: "#FFA500",
+																	}}>
+																	Rate Limit Exceeded
+																</span>
+															</div>
+															<p style={{ margin: 0, fontSize: "14px", lineHeight: "1.4" }}>
+																You've hit the API rate limit. This is likely due to free tier
+																limits.
+															</p>
+															<p
+																style={{
+																	margin: "8px 0 0 0",
+																	fontSize: "12px",
+																	lineHeight: "1.4",
+																}}>
+																You can read about the tier limits{" "}
+																<a
+																	href="https://codeassist.google/"
+																	style={{
+																		color: "inherit",
+																		textDecoration: "underline",
+																	}}
+																	onClick={(e) => {
+																		e.preventDefault()
+																		if (window.UiServiceClient) {
+																			window.UiServiceClient.openUrl({
+																				value: "https://codeassist.google/",
+																			})
+																		}
+																	}}>
+																	here
+																</a>
+																, or alternatively, you can use the Gemini Flash Model that will
+																give you better limits.
+															</p>
+														</div>
+													)
+												} else {
+													// Generic rate limit error for other providers
+													return (
+														<p
+															style={{
+																color: "var(--vscode-errorForeground)",
+																margin: 0,
+															}}>
+															{apiRequestFailedMessage || apiReqStreamingFailedMessage}
+														</p>
+													)
+												}
+											}
+
+											// Default generic error rendering
+											return (
+												<ErrorRow
+													message={message}
+													errorType="error"
+													apiRequestFailedMessage={apiRequestFailedMessage}
+													apiReqStreamingFailedMessage={apiReqStreamingFailedMessage}
+												/>
+											)
+										})()}
+									</>
 								)}
 
 								{isExpanded && (

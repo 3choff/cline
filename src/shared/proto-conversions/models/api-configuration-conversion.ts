@@ -251,6 +251,8 @@ function convertApiProviderToProto(provider: string | undefined): ProtoApiProvid
 			return ProtoApiProvider.LMSTUDIO
 		case "gemini":
 			return ProtoApiProvider.GEMINI
+		case "gemini-cli":
+			return ProtoApiProvider.GEMINI_CLI
 		case "openai-native":
 			return ProtoApiProvider.OPENAI_NATIVE
 		case "requesty":
@@ -331,6 +333,8 @@ export function convertProtoToApiProvider(provider: ProtoApiProvider): ApiProvid
 			return "lmstudio"
 		case ProtoApiProvider.GEMINI:
 			return "gemini"
+		case ProtoApiProvider.GEMINI_CLI:
+			return "gemini-cli"
 		case ProtoApiProvider.OPENAI_NATIVE:
 			return "openai-native"
 		case ProtoApiProvider.REQUESTY:
@@ -470,7 +474,8 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		difyBaseUrl: config.difyBaseUrl,
 		ocaBaseUrl: config.ocaBaseUrl,
 		ocaMode: config.ocaMode,
-
+		geminiCliOauthPath: config.geminiCliOAuthPath,
+		geminiCliProjectId: config.geminiCliProjectId,
 		// Plan mode configurations
 		planModeApiProvider: config.planModeApiProvider ? convertApiProviderToProto(config.planModeApiProvider) : undefined,
 		planModeApiModelId: config.planModeApiModelId,
@@ -621,6 +626,8 @@ export function convertProtoToApiConfiguration(protoConfig: ProtoApiConfiguratio
 		difyBaseUrl: protoConfig.difyBaseUrl,
 		ocaBaseUrl: protoConfig.ocaBaseUrl,
 		ocaMode: protoConfig.ocaMode,
+		geminiCliOAuthPath: protoConfig.geminiCliOauthPath,
+		geminiCliProjectId: protoConfig.geminiCliProjectId,
 
 		// Plan mode configurations
 		planModeApiProvider:

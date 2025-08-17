@@ -228,6 +228,7 @@ enum ApiProvider {
   QWEN_CODE = 33;
   DIFY = 34;
   OCA = 35;
+  GEMINI_CLI = 36;
 }
 
 // Model info for OpenAI-compatible models
@@ -345,6 +346,8 @@ message ModelsApiConfiguration {
   optional string oca_refresh_token = 75;
   optional string oca_mode = 76;
   optional bool aws_use_global_inference = 77;
+  optional string gemini_cli_oauth_path = 78;
+  optional string gemini_cli_project_id = 79;
 
   // Plan mode configurations
   optional ApiProvider plan_mode_api_provider = 100;

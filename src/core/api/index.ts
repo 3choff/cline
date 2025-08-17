@@ -24,6 +24,7 @@ import { NebiusHandler } from "./providers/nebius"
 import { OcaHandler } from "./providers/oca"
 import { OllamaHandler } from "./providers/ollama"
 import { OpenAiHandler } from "./providers/openai"
+import { GeminiCliHandler } from "./providers/gemini-cli"
 import { OpenAiNativeHandler } from "./providers/openai-native"
 import { OpenRouterHandler } from "./providers/openrouter"
 import { QwenHandler } from "./providers/qwen"
@@ -164,6 +165,14 @@ function createHandlerForProvider(
 					mode === "plan" ? options.planModeThinkingBudgetTokens : options.actModeThinkingBudgetTokens,
 				apiModelId: mode === "plan" ? options.planModeApiModelId : options.actModeApiModelId,
 				ulid: options.ulid,
+			})
+		case "gemini-cli":
+			return new GeminiCliHandler({
+				geminiCliOAuthPath: options.geminiCliOAuthPath,
+				geminiCliProjectId: options.geminiCliProjectId,
+				apiModelId: mode === "plan" ? options.planModeApiModelId : options.actModeApiModelId,
+				thinkingBudgetTokens:
+					mode === "plan" ? options.planModeThinkingBudgetTokens : options.actModeThinkingBudgetTokens,
 			})
 		case "openai-native":
 			return new OpenAiNativeHandler({
