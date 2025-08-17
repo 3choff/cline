@@ -10,6 +10,8 @@ import {
 	deepSeekModels,
 	geminiDefaultModelId,
 	geminiModels,
+	geminiCliDefaultModelId,
+	geminiCliModels,
 	mistralDefaultModelId,
 	mistralModels,
 	openAiModelInfoSaneDefaults,
@@ -118,6 +120,8 @@ export function normalizeApiConfiguration(
 			return getProviderData(vertexModels, vertexDefaultModelId)
 		case "gemini":
 			return getProviderData(geminiModels, geminiDefaultModelId)
+		case "gemini-cli":
+			return getProviderData(geminiCliModels, geminiCliDefaultModelId)
 		case "openai-native":
 			return getProviderData(openAiNativeModels, openAiNativeDefaultModelId)
 		case "deepseek":
