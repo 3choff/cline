@@ -251,6 +251,8 @@ function convertApiProviderToProto(provider: string | undefined): ProtoApiProvid
 			return ProtoApiProvider.LMSTUDIO
 		case "gemini":
 			return ProtoApiProvider.GEMINI
+		case "gemini-cli":
+			return ProtoApiProvider.GEMINI_CLI
 		case "openai-native":
 			return ProtoApiProvider.OPENAI_NATIVE
 		case "requesty":
@@ -339,6 +341,8 @@ export function convertProtoToApiProvider(provider: ProtoApiProvider): ApiProvid
 			return "lmstudio"
 		case ProtoApiProvider.GEMINI:
 			return "gemini"
+		case ProtoApiProvider.GEMINI_CLI:
+			return "gemini-cli"
 		case ProtoApiProvider.OPENAI_NATIVE:
 			return "openai-native"
 		case ProtoApiProvider.REQUESTY:
@@ -494,6 +498,8 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		aihubmixAppCode: config.aihubmixAppCode,
 		hicapApiKey: config.hicapApiKey,
 		hicapModelId: config.hicapModelId,
+		geminiCliOAuthPath: config.geminiCliOAuthPath,
+		geminiCliProjectId: config.geminiCliProjectId,
 
 		// Plan mode configurations
 		planModeApiProvider: config.planModeApiProvider ? convertApiProviderToProto(config.planModeApiProvider) : undefined,
@@ -661,6 +667,8 @@ export function convertProtoToApiConfiguration(protoConfig: ProtoApiConfiguratio
 		hicapApiKey: protoConfig.hicapApiKey,
 		hicapModelId: protoConfig.hicapModelId,
 		nousResearchApiKey: protoConfig.nousResearchApiKey,
+		geminiCliOAuthPath: protoConfig.geminiCliOAuthPath,
+		geminiCliProjectId: protoConfig.geminiCliProjectId,
 
 		// Plan mode configurations
 		planModeApiProvider:
