@@ -424,6 +424,7 @@ enum ApiProvider {
   HICAP = 37;
   AIHUBMIX = 38;
   NOUSRESEARCH = 39;
+  GEMINI_CLI = 40;
 }
 
 // Model info for OpenAI-compatible models
@@ -549,6 +550,9 @@ message ModelsApiConfiguration {
   optional string aihubmix_base_url = 83;
   optional string aihubmix_app_code = 84;
   optional string nous_research_api_key = 85;
+  optional string gemini_cli_oauth_path = 86;
+  optional string gemini_cli_project_id = 87;
+
 
   // Plan mode configurations
   optional ApiProvider plan_mode_api_provider = 100;
