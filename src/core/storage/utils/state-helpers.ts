@@ -43,6 +43,7 @@ export async function readSecretsFromDisk(context: ExtensionContext): Promise<Se
 		huaweiCloudMaasApiKey,
 		basetenApiKey,
 		zaiApiKey,
+		githubCopilotToken,
 		ollamaApiKey,
 		vercelAiGatewayApiKey,
 		difyApiKey,
@@ -81,6 +82,7 @@ export async function readSecretsFromDisk(context: ExtensionContext): Promise<Se
 		context.secrets.get("huaweiCloudMaasApiKey") as Promise<Secrets["huaweiCloudMaasApiKey"]>,
 		context.secrets.get("basetenApiKey") as Promise<Secrets["basetenApiKey"]>,
 		context.secrets.get("zaiApiKey") as Promise<Secrets["zaiApiKey"]>,
+		context.secrets.get("githubCopilotToken") as Promise<Secrets["githubCopilotToken"]>,
 		context.secrets.get("ollamaApiKey") as Promise<Secrets["ollamaApiKey"]>,
 		context.secrets.get("vercelAiGatewayApiKey") as Promise<Secrets["vercelAiGatewayApiKey"]>,
 		context.secrets.get("difyApiKey") as Promise<Secrets["difyApiKey"]>,
@@ -98,6 +100,7 @@ export async function readSecretsFromDisk(context: ExtensionContext): Promise<Se
 		huaweiCloudMaasApiKey,
 		basetenApiKey,
 		zaiApiKey,
+		githubCopilotToken,
 		ollamaApiKey,
 		vercelAiGatewayApiKey,
 		difyApiKey,
@@ -195,6 +198,8 @@ export async function readGlobalStateFromDisk(context: ExtensionContext): Promis
 		const qwenApiLine = context.globalState.get<GlobalStateAndSettings["qwenApiLine"]>("qwenApiLine")
 		const moonshotApiLine = context.globalState.get<GlobalStateAndSettings["moonshotApiLine"]>("moonshotApiLine")
 		const zaiApiLine = context.globalState.get<GlobalStateAndSettings["zaiApiLine"]>("zaiApiLine")
+		const githubCopilotBaseUrl =
+			context.globalState.get<GlobalStateAndSettings["githubCopilotBaseUrl"]>("githubCopilotBaseUrl")
 		const telemetrySetting = context.globalState.get<GlobalStateAndSettings["telemetrySetting"]>("telemetrySetting")
 		const asksageApiUrl = context.globalState.get<GlobalStateAndSettings["asksageApiUrl"]>("asksageApiUrl")
 		const planActSeparateModelsSettingRaw =
@@ -314,6 +319,7 @@ export async function readGlobalStateFromDisk(context: ExtensionContext): Promis
 		>("planModeVercelAiGatewayModelInfo")
 		const planModeOcaModelId = context.globalState.get("planModeOcaModelId") as string | undefined
 		const planModeOcaModelInfo = context.globalState.get("planModeOcaModelInfo") as OcaModelInfo | undefined
+		const planModeGitHubCopilotModel = context.globalState.get("planModeGitHubCopilotModel") as string | undefined
 		// Act mode configurations
 		const actModeApiProvider = context.globalState.get<GlobalStateAndSettings["actModeApiProvider"]>("actModeApiProvider")
 		const actModeApiModelId = context.globalState.get<GlobalStateAndSettings["actModeApiModelId"]>("actModeApiModelId")
@@ -380,6 +386,7 @@ export async function readGlobalStateFromDisk(context: ExtensionContext): Promis
 		>("actModeVercelAiGatewayModelInfo")
 		const actModeOcaModelId = context.globalState.get("actModeOcaModelId") as string | undefined
 		const actModeOcaModelInfo = context.globalState.get("actModeOcaModelInfo") as OcaModelInfo | undefined
+		const actModeGitHubCopilotModel = context.globalState.get("actModeGitHubCopilotModel") as string | undefined
 		const sapAiCoreUseOrchestrationMode =
 			context.globalState.get<GlobalStateAndSettings["sapAiCoreUseOrchestrationMode"]>("sapAiCoreUseOrchestrationMode")
 
@@ -441,6 +448,7 @@ export async function readGlobalStateFromDisk(context: ExtensionContext): Promis
 			qwenApiLine,
 			moonshotApiLine,
 			zaiApiLine,
+			githubCopilotBaseUrl,
 			azureApiVersion,
 			openRouterProviderSorting,
 			liteLlmBaseUrl,
@@ -492,6 +500,7 @@ export async function readGlobalStateFromDisk(context: ExtensionContext): Promis
 			planModeVercelAiGatewayModelInfo,
 			planModeOcaModelId,
 			planModeOcaModelInfo,
+			planModeGitHubCopilotModel,
 			// Act mode configurations
 			actModeApiProvider: actModeApiProvider || apiProvider,
 			actModeApiModelId,
@@ -526,14 +535,14 @@ export async function readGlobalStateFromDisk(context: ExtensionContext): Promis
 			actModeVercelAiGatewayModelInfo,
 			actModeOcaModelId,
 			actModeOcaModelInfo,
-
-			// Other global fields
+			actModeGitHubCopilotModel,
+			// Workspace information fields
 			focusChainSettings: focusChainSettings || DEFAULT_FOCUS_CHAIN_SETTINGS,
 			dictationSettings: { ...DEFAULT_DICTATION_SETTINGS, ...dictationSettings },
 			strictPlanModeEnabled: strictPlanModeEnabled ?? true,
 			yoloModeToggled: yoloModeToggled ?? false,
 			useAutoCondense: useAutoCondense ?? false,
-			isNewUser: isNewUser ?? true,
+			isNewUser: isNewUser ?? false,
 			welcomeViewCompleted,
 			lastShownAnnouncementId,
 			taskHistory: taskHistory || [],
@@ -618,6 +627,7 @@ export async function resetGlobalState(controller: Controller) {
 		"huaweiCloudMaasApiKey",
 		"vercelAiGatewayApiKey",
 		"zaiApiKey",
+		"githubCopilotToken",
 		"difyApiKey",
 		"ocaApiKey",
 		"ocaRefreshToken",

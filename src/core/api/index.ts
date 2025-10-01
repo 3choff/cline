@@ -13,6 +13,7 @@ import { DifyHandler } from "./providers/dify"
 import { DoubaoHandler } from "./providers/doubao"
 import { FireworksHandler } from "./providers/fireworks"
 import { GeminiHandler } from "./providers/gemini"
+import { GitHubCopilotHandler } from "./providers/github-copilot"
 import { GroqHandler } from "./providers/groq"
 import { HuaweiCloudMaaSHandler } from "./providers/huawei-cloud-maas"
 import { HuggingFaceHandler } from "./providers/huggingface"
@@ -163,6 +164,14 @@ function createHandlerForProvider(
 					mode === "plan" ? options.planModeThinkingBudgetTokens : options.actModeThinkingBudgetTokens,
 				apiModelId: mode === "plan" ? options.planModeApiModelId : options.actModeApiModelId,
 				ulid: options.ulid,
+			})
+		case "github-copilot":
+			return new GitHubCopilotHandler({
+				onRetryAttempt: options.onRetryAttempt,
+				token: options.githubCopilotToken,
+				model: mode === "plan" ? options.planModeGitHubCopilotModel : options.actModeGitHubCopilotModel,
+				baseUrl: options.githubCopilotBaseUrl,
+				reasoningEffort: mode === "plan" ? options.planModeReasoningEffort : options.actModeReasoningEffort,
 			})
 		case "openai-native":
 			return new OpenAiNativeHandler({

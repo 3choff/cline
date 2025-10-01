@@ -416,6 +416,8 @@ export class StateManager {
 			difyBaseUrl,
 			vercelAiGatewayApiKey,
 			zaiApiKey,
+			githubCopilotToken,
+			githubCopilotBaseUrl,
 			requestTimeoutMs,
 			ocaBaseUrl,
 			// Plan mode configurations
@@ -452,6 +454,7 @@ export class StateManager {
 			planModeVercelAiGatewayModelInfo,
 			planModeOcaModelId,
 			planModeOcaModelInfo,
+			planModeGitHubCopilotModel,
 			// Act mode configurations
 			actModeApiProvider,
 			actModeApiModelId,
@@ -486,6 +489,7 @@ export class StateManager {
 			actModeVercelAiGatewayModelInfo,
 			actModeOcaModelId,
 			actModeOcaModelInfo,
+			actModeGitHubCopilotModel,
 		} = apiConfiguration
 
 		// Batch update global state keys
@@ -524,6 +528,7 @@ export class StateManager {
 			planModeVercelAiGatewayModelInfo,
 			planModeOcaModelId,
 			planModeOcaModelInfo,
+			planModeGitHubCopilotModel,
 
 			// Act mode configuration updates
 			actModeApiProvider,
@@ -559,6 +564,7 @@ export class StateManager {
 			actModeVercelAiGatewayModelInfo,
 			actModeOcaModelId,
 			actModeOcaModelInfo,
+			actModeGitHubCopilotModel,
 
 			// Global state updates
 			awsRegion,
@@ -586,6 +592,7 @@ export class StateManager {
 			qwenApiLine,
 			moonshotApiLine,
 			zaiApiLine,
+			githubCopilotBaseUrl,
 			asksageApiUrl,
 			requestTimeoutMs,
 			fireworksModelMaxCompletionTokens,
@@ -636,6 +643,7 @@ export class StateManager {
 			difyApiKey,
 			vercelAiGatewayApiKey,
 			zaiApiKey,
+			githubCopilotToken,
 		})
 	}
 
@@ -899,6 +907,7 @@ export class StateManager {
 			difyApiKey: this.secretsCache["difyApiKey"],
 			vercelAiGatewayApiKey: this.secretsCache["vercelAiGatewayApiKey"],
 			zaiApiKey: this.secretsCache["zaiApiKey"],
+			githubCopilotToken: this.secretsCache["githubCopilotToken"],
 
 			// Global state
 			awsRegion: this.taskStateCache["awsRegion"] || this.globalStateCache["awsRegion"],
@@ -930,6 +939,7 @@ export class StateManager {
 			qwenApiLine: this.taskStateCache["qwenApiLine"] || this.globalStateCache["qwenApiLine"],
 			moonshotApiLine: this.taskStateCache["moonshotApiLine"] || this.globalStateCache["moonshotApiLine"],
 			zaiApiLine: this.taskStateCache["zaiApiLine"] || this.globalStateCache["zaiApiLine"],
+			githubCopilotBaseUrl: this.taskStateCache["githubCopilotBaseUrl"] || this.globalStateCache["githubCopilotBaseUrl"],
 			asksageApiUrl: this.taskStateCache["asksageApiUrl"] || this.globalStateCache["asksageApiUrl"],
 			requestTimeoutMs: this.taskStateCache["requestTimeoutMs"] || this.globalStateCache["requestTimeoutMs"],
 			fireworksModelMaxCompletionTokens:
@@ -1010,6 +1020,7 @@ export class StateManager {
 				this.globalStateCache["planModeVercelAiGatewayModelInfo"],
 			planModeOcaModelId: this.globalStateCache["planModeOcaModelId"],
 			planModeOcaModelInfo: this.globalStateCache["planModeOcaModelInfo"],
+			planModeGitHubCopilotModel: this.globalStateCache["planModeGitHubCopilotModel"],
 
 			// Act mode configurations
 			actModeApiProvider: this.taskStateCache["actModeApiProvider"] || this.globalStateCache["actModeApiProvider"],
@@ -1072,6 +1083,7 @@ export class StateManager {
 				this.globalStateCache["actModeVercelAiGatewayModelInfo"],
 			actModeOcaModelId: this.globalStateCache["actModeOcaModelId"],
 			actModeOcaModelInfo: this.globalStateCache["actModeOcaModelInfo"],
+			actModeGitHubCopilotModel: this.globalStateCache["actModeGitHubCopilotModel"],
 		}
 	}
 }

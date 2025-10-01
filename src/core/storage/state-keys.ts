@@ -76,6 +76,7 @@ export interface Settings {
 	qwenApiLine: string | undefined
 	moonshotApiLine: string | undefined
 	zaiApiLine: string | undefined
+	githubCopilotBaseUrl: string | undefined
 	telemetrySetting: TelemetrySetting
 	asksageApiUrl: string | undefined
 	planActSeparateModelsSetting: boolean
@@ -171,6 +172,8 @@ export interface Settings {
 	actModeVercelAiGatewayModelInfo: ModelInfo | undefined
 	actModeOcaModelId: string | undefined
 	actModeOcaModelInfo: OcaModelInfo | undefined
+	planModeGitHubCopilotModel: string | undefined
+	actModeGitHubCopilotModel: string | undefined
 }
 
 export interface Secrets {
@@ -209,6 +212,7 @@ export interface Secrets {
 	basetenApiKey: string | undefined
 	vercelAiGatewayApiKey: string | undefined
 	difyApiKey: string | undefined
+	githubCopilotToken: string | undefined
 	ocaApiKey: string | undefined
 	ocaRefreshToken: string | undefined
 }

@@ -10,6 +10,7 @@ export type ApiProvider =
 	| "ollama"
 	| "lmstudio"
 	| "gemini"
+	| "github-copilot"
 	| "openai-native"
 	| "requesty"
 	| "together"
@@ -75,6 +76,7 @@ export interface ApiHandlerSecrets {
 	basetenApiKey?: string
 	vercelAiGatewayApiKey?: string
 	difyApiKey?: string
+	githubCopilotToken?: string
 }
 
 export interface ApiHandlerOptions {
@@ -119,6 +121,7 @@ export interface ApiHandlerOptions {
 	zaiApiLine?: string
 	onRetryAttempt?: (attempt: number, maxRetries: number, delay: number, error: any) => void
 	ocaBaseUrl?: string
+	githubCopilotBaseUrl?: string
 
 	// Plan mode configurations
 	planModeApiModelId?: string
@@ -153,7 +156,7 @@ export interface ApiHandlerOptions {
 	planModeVercelAiGatewayModelInfo?: ModelInfo
 	planModeOcaModelId?: string
 	planModeOcaModelInfo?: OcaModelInfo
-	// Act mode configurations
+	planModeGitHubCopilotModel?: string
 
 	// Act mode configurations
 	actModeApiModelId?: string
@@ -188,6 +191,7 @@ export interface ApiHandlerOptions {
 	actModeVercelAiGatewayModelInfo?: ModelInfo
 	actModeOcaModelId?: string
 	actModeOcaModelInfo?: OcaModelInfo
+	actModeGitHubCopilotModel?: string
 }
 
 export type ApiConfiguration = ApiHandlerOptions &

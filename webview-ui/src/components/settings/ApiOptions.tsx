@@ -23,6 +23,7 @@ import { DifyProvider } from "./providers/DifyProvider"
 import { DoubaoProvider } from "./providers/DoubaoProvider"
 import { FireworksProvider } from "./providers/FireworksProvider"
 import { GeminiProvider } from "./providers/GeminiProvider"
+import { GitHubCopilotProvider } from "./providers/GitHubCopilotProvider"
 import { GroqProvider } from "./providers/GroqProvider"
 import { HuaweiCloudMaasProvider } from "./providers/HuaweiCloudMaasProvider"
 import { HuggingFaceProvider } from "./providers/HuggingFaceProvider"
@@ -131,6 +132,7 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 			{ value: "gemini", label: "Google Gemini" },
 			{ value: "openai", label: "OpenAI Compatible" },
 			{ value: "anthropic", label: "Anthropic" },
+			{ value: "github-copilot", label: "GitHub Copilot" },
 			{ value: "bedrock", label: "Amazon Bedrock" },
 			{ value: "vscode-lm", label: "VS Code LM API" },
 			{ value: "deepseek", label: "DeepSeek" },
@@ -365,6 +367,10 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 
 			{apiConfiguration && selectedProvider === "anthropic" && (
 				<AnthropicProvider currentMode={currentMode} isPopup={isPopup} showModelOptions={showModelOptions} />
+			)}
+
+			{apiConfiguration && selectedProvider === "github-copilot" && (
+				<GitHubCopilotProvider currentMode={currentMode} isPopup={isPopup} showModelOptions={showModelOptions} />
 			)}
 
 			{apiConfiguration && selectedProvider === "claude-code" && (

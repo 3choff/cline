@@ -117,10 +117,12 @@ export function normalizeApiConfiguration(
 					currentMode === "plan"
 						? apiConfiguration?.planModeAwsBedrockCustomModelBaseId
 						: apiConfiguration?.actModeAwsBedrockCustomModelBaseId
+				const bedrockApiModelId =
+					currentMode === "plan" ? apiConfiguration?.planModeApiModelId : apiConfiguration?.actModeApiModelId
 
 				return {
 					selectedProvider: provider,
-					selectedModelId: modelId || bedrockDefaultModelId,
+					selectedModelId: bedrockApiModelId || bedrockDefaultModelId,
 					selectedModelInfo:
 						(baseModelId && bedrockModels[baseModelId as keyof typeof bedrockModels]) ||
 						bedrockModels[bedrockDefaultModelId],
@@ -348,6 +350,53 @@ export function normalizeApiConfiguration(
 						? fireworksModels[fireworksModelId as keyof typeof fireworksModels]
 						: fireworksModels[fireworksDefaultModelId],
 			}
+		case "github-copilot":
+			const githubCopilotModel =
+				currentMode === "plan"
+					? apiConfiguration?.planModeGitHubCopilotModel
+					: apiConfiguration?.actModeGitHubCopilotModel
+			const modelId = githubCopilotModel || "claude-sonnet-4"
+
+			// Set model info based on selected model
+			let modelInfo: ModelInfo
+			if (modelId.includes("claude")) {
+				modelInfo = {
+					maxTokens: 8192,
+					contextWindow: 200000,
+					supportsImages: true,
+					supportsPromptCache: false,
+					inputPrice: 0,
+					outputPrice: 0,
+					description: `GitHub Copilot - ${modelId}`,
+				}
+			} else if (modelId === "gpt-5-mini") {
+				modelInfo = {
+					maxTokens: 16384,
+					contextWindow: 128000,
+					supportsImages: true,
+					supportsPromptCache: false,
+					inputPrice: 0,
+					outputPrice: 0,
+					description: `GitHub Copilot - ${modelId}`,
+				}
+			} else {
+				// gpt-5
+				modelInfo = {
+					maxTokens: 8192,
+					contextWindow: 200000,
+					supportsImages: true,
+					supportsPromptCache: false,
+					inputPrice: 0,
+					outputPrice: 0,
+					description: `GitHub Copilot - ${modelId}`,
+				}
+			}
+
+			return {
+				selectedProvider: provider,
+				selectedModelId: modelId,
+				selectedModelInfo: modelInfo,
+			}
 		case "oca":
 			const ocaModelId = currentMode === "plan" ? apiConfiguration?.planModeOcaModelId : apiConfiguration?.actModeOcaModelId
 			const ocaModelInfo =
@@ -407,6 +456,10 @@ export function getModeSpecificFields(apiConfiguration: ApiConfiguration | undef
 
 			// Huawei Cloud Maas Model Info
 			huaweiCloudMaasModelInfo: undefined,
+
+			// GitHub Copilot fields
+			githubCopilotToken: undefined,
+			githubCopilotModel: undefined,
 
 			// Other mode-specific fields
 			thinkingBudgetTokens: undefined,
@@ -472,6 +525,10 @@ export function getModeSpecificFields(apiConfiguration: ApiConfiguration | undef
 			mode === "plan"
 				? apiConfiguration.planModeHuaweiCloudMaasModelInfo
 				: apiConfiguration.actModeHuaweiCloudMaasModelInfo,
+
+		// GitHub Copilot fields
+		githubCopilotModel:
+			mode === "plan" ? apiConfiguration.planModeGitHubCopilotModel : apiConfiguration.actModeGitHubCopilotModel,
 
 		// Other mode-specific fields
 		thinkingBudgetTokens:
@@ -588,6 +645,11 @@ export async function syncModeConfigurations(
 		case "fireworks":
 			updates.planModeFireworksModelId = sourceFields.fireworksModelId
 			updates.actModeFireworksModelId = sourceFields.fireworksModelId
+			break
+
+		case "github-copilot":
+			updates.planModeGitHubCopilotModel = sourceFields.githubCopilotModel
+			updates.actModeGitHubCopilotModel = sourceFields.githubCopilotModel
 			break
 
 		case "bedrock":

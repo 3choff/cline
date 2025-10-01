@@ -209,6 +209,7 @@ enum ApiProvider {
   QWEN_CODE = 33;
   DIFY = 34;
   OCA = 35;
+  GITHUB_COPILOT = 36;
 }
 
 // Model info for OpenAI-compatible models
@@ -324,6 +325,8 @@ message ModelsApiConfiguration {
   optional string oca_base_url = 73;
   optional string oca_api_key = 74;
   optional string oca_refresh_token = 75;
+  optional string github_copilot_token = 76;
+  optional string github_copilot_base_url = 77;
 
   // Plan mode configurations
   optional ApiProvider plan_mode_api_provider = 100;
@@ -359,6 +362,7 @@ message ModelsApiConfiguration {
   optional OpenRouterModelInfo plan_mode_vercel_ai_gateway_model_info = 130;
   optional string plan_mode_oca_model_id = 131;
   optional OcaModelInfo plan_mode_oca_model_info = 132;
+  optional string plan_mode_git_hub_copilot_model = 133;
 
 
   // Act mode configurations
@@ -395,4 +399,5 @@ message ModelsApiConfiguration {
   optional OpenRouterModelInfo act_mode_vercel_ai_gateway_model_info = 230;
   optional string act_mode_oca_model_id = 231;
   optional OcaModelInfo act_mode_oca_model_info = 232;
+  optional string act_mode_git_hub_copilot_model = 233;
 }
