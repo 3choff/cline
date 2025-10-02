@@ -21,6 +21,8 @@ import {
 	fireworksModels,
 	geminiDefaultModelId,
 	geminiModels,
+	githubCopilotDefaultModelId,
+	githubCopilotModels,
 	groqDefaultModelId,
 	groqModels,
 	huaweiCloudMaasDefaultModelId,
@@ -351,51 +353,17 @@ export function normalizeApiConfiguration(
 						: fireworksModels[fireworksDefaultModelId],
 			}
 		case "github-copilot":
-			const githubCopilotModel =
+			const githubCopilotModelId =
 				currentMode === "plan"
 					? apiConfiguration?.planModeGitHubCopilotModel
 					: apiConfiguration?.actModeGitHubCopilotModel
-			const modelId = githubCopilotModel || "claude-sonnet-4"
-
-			// Set model info based on selected model
-			let modelInfo: ModelInfo
-			if (modelId.includes("claude")) {
-				modelInfo = {
-					maxTokens: 8192,
-					contextWindow: 200000,
-					supportsImages: true,
-					supportsPromptCache: false,
-					inputPrice: 0,
-					outputPrice: 0,
-					description: `GitHub Copilot - ${modelId}`,
-				}
-			} else if (modelId === "gpt-5-mini") {
-				modelInfo = {
-					maxTokens: 16384,
-					contextWindow: 128000,
-					supportsImages: true,
-					supportsPromptCache: false,
-					inputPrice: 0,
-					outputPrice: 0,
-					description: `GitHub Copilot - ${modelId}`,
-				}
-			} else {
-				// gpt-5
-				modelInfo = {
-					maxTokens: 8192,
-					contextWindow: 200000,
-					supportsImages: true,
-					supportsPromptCache: false,
-					inputPrice: 0,
-					outputPrice: 0,
-					description: `GitHub Copilot - ${modelId}`,
-				}
-			}
-
 			return {
 				selectedProvider: provider,
-				selectedModelId: modelId,
-				selectedModelInfo: modelInfo,
+				selectedModelId: githubCopilotModelId || githubCopilotDefaultModelId,
+				selectedModelInfo:
+					githubCopilotModelId && githubCopilotModelId in githubCopilotModels
+						? githubCopilotModels[githubCopilotModelId as keyof typeof githubCopilotModels]
+						: githubCopilotModels[githubCopilotDefaultModelId],
 			}
 		case "oca":
 			const ocaModelId = currentMode === "plan" ? apiConfiguration?.planModeOcaModelId : apiConfiguration?.actModeOcaModelId

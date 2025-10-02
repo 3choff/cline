@@ -536,24 +536,25 @@ export default YourProviderProvider
 **File**: `src/shared/api.ts`
 
 ```typescript
+// Example: GitHub Copilot models with accurate values from API response
 export const yourProviderModels = {
   "model-1": {
-    maxTokens: 4096,
-    contextWindow: 128000,
+    maxTokens: 64000,           // From API: max_output_tokens
+    contextWindow: 264000,       // From API: max_context_window_tokens
+    supportsImages: true,        // From API: supports.vision
+    supportsPromptCache: false,  // Check if provider supports prompt caching
+    inputPrice: 0.0,            // From pricing documentation
+    outputPrice: 0.0,           // From pricing documentation
+    description: "Model 1 description (include context size for clarity)",
+  },
+  "model-2": {
+    maxTokens: 16000,
+    contextWindow: 216000,
     supportsImages: true,
     supportsPromptCache: false,
     inputPrice: 0.0,
     outputPrice: 0.0,
-    description: "Model 1 description",
-  },
-  "model-2": {
-    maxTokens: 8192,
-    contextWindow: 200000,
-    supportsImages: false,
-    supportsPromptCache: false,
-    inputPrice: 0.0,
-    outputPrice: 0.0,
-    description: "Model 2 description",
+    description: "Model 2 description (include context size for clarity)",
   },
 } as const satisfies Record<string, ModelInfo>
 
@@ -561,11 +562,20 @@ export type YourProviderModelId = keyof typeof yourProviderModels
 export const yourProviderDefaultModelId: YourProviderModelId = "model-1"
 ```
 
+**Common mistakes to avoid:**
+- ❌ Using placeholder values (e.g., 4096, 128000) without verification
+- ❌ Assuming all models have the same context window
+- ❌ Not checking the actual API response for accurate limits
+- ✅ Always verify against the provider's actual API or documentation
+
 #### 6.3 Add to Provider Utils
 
 **File**: `webview-ui/src/components/settings/utils/providerUtils.ts`
 
 **Add to normalizeApiConfiguration**:
+
+⚠️ **CRITICAL**: If your provider uses **custom model field names** (like `planModeYourProviderModel` instead of the generic `planModeApiModelId`), you MUST manually read them. Otherwise, model selection won't persist!
+
 ```typescript
 export function normalizeApiConfiguration(
   apiConfiguration: ApiConfiguration | undefined,
@@ -575,13 +585,33 @@ export function normalizeApiConfiguration(
   switch (provider) {
     // ... existing cases
     
+    // Option 1: If using GENERIC fields (planModeApiModelId/actModeApiModelId)
     case "your-provider":
       return getProviderData(yourProviderModels, yourProviderDefaultModelId)
+    
+    // Option 2: If using CUSTOM fields (planModeYourProviderModel/actModeYourProviderModel)
+    case "your-provider":
+      const yourProviderModelId =
+        currentMode === "plan"
+          ? apiConfiguration?.planModeYourProviderModel
+          : apiConfiguration?.actModeYourProviderModel
+      return {
+        selectedProvider: provider,
+        selectedModelId: yourProviderModelId || yourProviderDefaultModelId,
+        selectedModelInfo:
+          yourProviderModelId && yourProviderModelId in yourProviderModels
+            ? yourProviderModels[yourProviderModelId as keyof typeof yourProviderModels]
+            : yourProviderModels[yourProviderDefaultModelId],
+      }
     
     // ...
   }
 }
 ```
+
+**When to use which approach:**
+- **Option 1 (getProviderData)**: Use if your provider stores model in `planModeApiModelId`/`actModeApiModelId` (like Anthropic, XAI, Gemini)
+- **Option 2 (manual)**: Use if your provider has custom model fields (like Fireworks, GitHub Copilot, OpenRouter)
 
 **Add to getModeSpecificFields**:
 ```typescript
@@ -690,6 +720,37 @@ this.setSecretsBatch({
 **Cause**: Missing from `ApiOptions.tsx` provider list.
 
 **Fix**: Add provider to both the dropdown list and conditional rendering.
+
+### 6. Model Selection Not Updating in UI
+
+**Symptom**: Model dropdown doesn't reflect the selected model; always shows default.
+
+**Cause**: Using `getProviderData()` helper when provider has custom model fields.
+
+**Fix**: Manually read the custom model fields in `normalizeApiConfiguration()`:
+
+```typescript
+// ❌ WRONG - if using custom fields
+case "your-provider":
+  return getProviderData(yourProviderModels, yourProviderDefaultModelId)
+
+// ✅ CORRECT - manually read custom fields
+case "your-provider":
+  const yourProviderModelId =
+    currentMode === "plan"
+      ? apiConfiguration?.planModeYourProviderModel
+      : apiConfiguration?.actModeYourProviderModel
+  return {
+    selectedProvider: provider,
+    selectedModelId: yourProviderModelId || yourProviderDefaultModelId,
+    selectedModelInfo:
+      yourProviderModelId && yourProviderModelId in yourProviderModels
+        ? yourProviderModels[yourProviderModelId as keyof typeof yourProviderModels]
+        : yourProviderModels[yourProviderDefaultModelId],
+  }
+```
+
+**Why**: The `getProviderData()` helper only reads from `planModeApiModelId`/`actModeApiModelId`. If your provider uses custom field names (like `planModeYourProviderModel`), you must read them manually.
 
 ---
 

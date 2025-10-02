@@ -2742,6 +2742,49 @@ export const xaiModels = {
 	},
 } as const satisfies Record<string, ModelInfo>
 
+// GitHub Copilot
+// https://docs.github.com/en/copilot/using-github-copilot/using-chat-features-in-your-ide
+export type GitHubCopilotModelId = keyof typeof githubCopilotModels
+export const githubCopilotDefaultModelId: GitHubCopilotModelId = "claude-sonnet-4"
+export const githubCopilotModels = {
+	"gpt-5-mini": {
+		maxTokens: 64000,
+		contextWindow: 264000,
+		supportsImages: true,
+		supportsPromptCache: false,
+		inputPrice: 0,
+		outputPrice: 0,
+		description: "GitHub Copilot - GPT-5 Mini (fast and efficient, 264K context)",
+	},
+	"gpt-5": {
+		maxTokens: 64000,
+		contextWindow: 264000,
+		supportsImages: true,
+		supportsPromptCache: false,
+		inputPrice: 0,
+		outputPrice: 0,
+		description: "GitHub Copilot - GPT-5 (advanced reasoning, 264K context)",
+	},
+	"claude-sonnet-4": {
+		maxTokens: 16000,
+		contextWindow: 216000,
+		supportsImages: true,
+		supportsPromptCache: false,
+		inputPrice: 0,
+		outputPrice: 0,
+		description: "GitHub Copilot - Claude Sonnet 4 (balanced performance, 216K context)",
+	},
+	"claude-sonnet-4.5": {
+		maxTokens: 16000,
+		contextWindow: 216000,
+		supportsImages: true,
+		supportsPromptCache: false,
+		inputPrice: 0,
+		outputPrice: 0,
+		description: "GitHub Copilot - Claude Sonnet 4.5 (latest version, 216K context)",
+	},
+} as const satisfies Record<string, ModelInfo>
+
 // SambaNova
 // https://docs.sambanova.ai/cloud/docs/get-started/supported-models
 export type SambanovaModelId = keyof typeof sambanovaModels

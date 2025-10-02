@@ -1,9 +1,10 @@
+import { githubCopilotModels } from "@shared/api"
 import { Mode } from "@shared/storage/types"
-import { VSCodeDropdown, VSCodeOption } from "@vscode/webview-ui-toolkit/react"
 import { useExtensionState } from "@/context/ExtensionStateContext"
 import { ApiKeyField } from "../common/ApiKeyField"
 import { BaseUrlField } from "../common/BaseUrlField"
 import { ModelInfoView } from "../common/ModelInfoView"
+import { ModelSelector } from "../common/ModelSelector"
 import { normalizeApiConfiguration } from "../utils/providerUtils"
 import { useApiConfigurationHandlers } from "../utils/useApiConfigurationHandlers"
 
@@ -43,27 +44,17 @@ export const GitHubCopilotProvider = ({ showModelOptions, isPopup, currentMode }
 
 			{showModelOptions && (
 				<>
-					<div style={{ marginBottom: 10 }}>
-						<label htmlFor="github-copilot-model">
-							<span style={{ fontWeight: 500 }}>Model</span>
-						</label>
-						<VSCodeDropdown
-							id="github-copilot-model"
-							onChange={(e: any) =>
-								handleModeFieldChange(
-									{ plan: "planModeGitHubCopilotModel", act: "actModeGitHubCopilotModel" },
-									e.target.value,
-									currentMode,
-								)
-							}
-							style={{ width: "100%" }}
-							value={selectedModelId || "claude-sonnet-4"}>
-							<VSCodeOption value="gpt-5-mini">gpt-5-mini</VSCodeOption>
-							<VSCodeOption value="gpt-5">gpt-5</VSCodeOption>
-							<VSCodeOption value="claude-sonnet-4">claude-sonnet-4</VSCodeOption>
-							<VSCodeOption value="claude-sonnet-4.5">claude-sonnet-4.5</VSCodeOption>
-						</VSCodeDropdown>
-					</div>
+					<ModelSelector
+						models={githubCopilotModels}
+						onChange={(e: any) =>
+							handleModeFieldChange(
+								{ plan: "planModeGitHubCopilotModel", act: "actModeGitHubCopilotModel" },
+								e.target.value,
+								currentMode,
+							)
+						}
+						selectedModelId={selectedModelId}
+					/>
 
 					<ModelInfoView isPopup={isPopup} modelInfo={selectedModelInfo} selectedModelId={selectedModelId} />
 				</>
