@@ -1,4 +1,3 @@
-import { ANTHROPIC_MAX_THINKING_BUDGET, ANTHROPIC_MIN_THINKING_BUDGET } from "@shared/api"
 import { Mode } from "@shared/storage/types"
 import { VSCodeCheckbox } from "@vscode/webview-ui-toolkit/react"
 import { memo, useCallback, useEffect, useState } from "react"
@@ -66,7 +65,7 @@ interface ThinkingBudgetSliderProps {
 	currentMode: Mode
 }
 
-const ThinkingBudgetSlider = ({ currentMode }: ThinkingBudgetSliderProps) => {
+const ThinkingBudgetSlider = ({ maxBudget, currentMode }: ThinkingBudgetSliderProps) => {
 	const { apiConfiguration } = useExtensionState()
 	const { handleModeFieldChange } = useApiConfigurationHandlers()
 
@@ -76,6 +75,10 @@ const ThinkingBudgetSlider = ({ currentMode }: ThinkingBudgetSliderProps) => {
 	const [localValue, setLocalValue] = useState(modeFields.thinkingBudgetTokens || 0)
 
 	const [isEnabled, setIsEnabled] = useState<boolean>((modeFields.thinkingBudgetTokens || 0) > 0)
+
+	// Use model-specific limits or fallback to reasonable defaults
+	const maxLimit = maxBudget || 32000 // Fallback to 32k if no maxBudget provided
+	const minLimit = 1024 // Minimum thinking budget
 
 	useEffect(() => {
 		const newThinkingBudgetValue = modeFields.thinkingBudgetTokens || 0
@@ -90,11 +93,14 @@ const ThinkingBudgetSlider = ({ currentMode }: ThinkingBudgetSliderProps) => {
 		}
 	}, [modeFields.thinkingBudgetTokens])
 
-	const handleSliderChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-		const value = parseInt(event.target.value, 10)
-		const clampedValue = Math.max(value, ANTHROPIC_MIN_THINKING_BUDGET)
-		setLocalValue(clampedValue)
-	}, [])
+	const handleSliderChange = useCallback(
+		(event: React.ChangeEvent<HTMLInputElement>) => {
+			const value = parseInt(event.target.value, 10)
+			const clampedValue = Math.max(value, minLimit)
+			setLocalValue(clampedValue)
+		},
+		[minLimit],
+	)
 
 	const handleSliderComplete = () => {
 		handleModeFieldChange(
@@ -106,7 +112,7 @@ const ThinkingBudgetSlider = ({ currentMode }: ThinkingBudgetSliderProps) => {
 
 	const handleToggleChange = (event: any) => {
 		const isChecked = (event.target as HTMLInputElement).checked
-		const newThinkingBudgetValue = isChecked ? ANTHROPIC_MIN_THINKING_BUDGET : 0
+		const newThinkingBudgetValue = isChecked ? minLimit : 0
 		setIsEnabled(isChecked)
 		setLocalValue(newThinkingBudgetValue)
 
@@ -126,17 +132,17 @@ const ThinkingBudgetSlider = ({ currentMode }: ThinkingBudgetSliderProps) => {
 			{isEnabled && (
 				<Container>
 					<RangeInput
-						$max={ANTHROPIC_MAX_THINKING_BUDGET}
-						$min={0}
+						$max={maxLimit}
+						$min={minLimit}
 						$value={localValue}
 						aria-describedby="thinking-budget-description"
 						aria-label={`Thinking budget: ${localValue.toLocaleString()} tokens`}
-						aria-valuemax={ANTHROPIC_MAX_THINKING_BUDGET}
-						aria-valuemin={ANTHROPIC_MIN_THINKING_BUDGET}
+						aria-valuemax={maxLimit}
+						aria-valuemin={minLimit}
 						aria-valuenow={localValue}
 						id="thinking-budget-slider"
-						max={ANTHROPIC_MAX_THINKING_BUDGET}
-						min={0}
+						max={maxLimit}
+						min={minLimit}
 						onChange={handleSliderChange}
 						onMouseUp={handleSliderComplete}
 						onTouchEnd={handleSliderComplete}
