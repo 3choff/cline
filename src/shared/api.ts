@@ -505,6 +505,9 @@ export const geminiCliModels = {
 		inputPrice: 0, // Free tier via OAuth
 		outputPrice: 0, // Free tier via OAuth
 		description: "Google's Gemini 2.5 Pro model via OAuth (free tier)",
+		thinkingConfig: {
+			maxBudget: 32767,
+		},
 	},
 	"gemini-2.5-flash": {
 		maxTokens: 65536,
@@ -514,6 +517,9 @@ export const geminiCliModels = {
 		inputPrice: 0, // Free tier via OAuth
 		outputPrice: 0, // Free tier via OAuth
 		description: "Google's Gemini 2.5 Flash model via OAuth (free tier)",
+		thinkingConfig: {
+			maxBudget: 24576,
+		},
 	},
 	"gemini-2.0-flash-001": {
 		maxTokens: 8192,
