@@ -12,18 +12,18 @@
  */
 
 import { geminiCliModels } from "@shared/api"
+import { Mode } from "@shared/storage/types"
 import { VSCodeLink, VSCodeTextField } from "@vscode/webview-ui-toolkit/react"
 import { memo } from "react"
-import { ModelSelector } from "../common/ModelSelector"
-import { ModelInfoView } from "../common/ModelInfoView"
-import { normalizeApiConfiguration } from "../utils/providerUtils"
-import { Mode } from "@shared/storage/types"
-import { useApiConfigurationHandlers } from "../utils/useApiConfigurationHandlers"
-import ThinkingBudgetSlider from "../ThinkingBudgetSlider"
 import { useExtensionState } from "@/context/ExtensionStateContext"
+import { ModelInfoView } from "../common/ModelInfoView"
+import { ModelSelector } from "../common/ModelSelector"
+import ThinkingBudgetSlider from "../ThinkingBudgetSlider"
+import { normalizeApiConfiguration } from "../utils/providerUtils"
+import { useApiConfigurationHandlers } from "../utils/useApiConfigurationHandlers"
 
 // Gemini models that support thinking/reasoning mode
-const SUPPORTED_THINKING_MODELS = ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite-preview-06-17"]
+const SUPPORTED_THINKING_MODELS = ["gemini-2.5-pro", "gemini-2.5-flash"]
 
 interface GeminiCliProviderProps {
 	showModelOptions: boolean
@@ -39,11 +39,11 @@ export const GeminiCliProvider = ({ showModelOptions, isPopup, currentMode }: Ge
 	return (
 		<div>
 			<VSCodeTextField
-				value={apiConfiguration?.geminiCliOAuthPath || ""}
+				onInput={(e: any) => handleFieldChange("geminiCliOAuthPath", e.target.value)}
+				placeholder="Default: ~/.gemini/oauth_creds.json"
 				style={{ width: "100%", marginTop: 3 }}
 				type="text"
-				onInput={(e: any) => handleFieldChange("geminiCliOAuthPath", e.target.value)}
-				placeholder="Default: ~/.gemini/oauth_creds.json">
+				value={apiConfiguration?.geminiCliOAuthPath || ""}>
 				<span style={{ fontWeight: 500 }}>OAuth Credentials Path (optional)</span>
 			</VSCodeTextField>
 			<p
@@ -58,10 +58,10 @@ export const GeminiCliProvider = ({ showModelOptions, isPopup, currentMode }: Ge
 			{apiConfiguration?.geminiCliProjectId && (
 				<>
 					<VSCodeTextField
-						value={apiConfiguration.geminiCliProjectId}
+						disabled
 						style={{ width: "100%", marginTop: 3 }}
 						type="text"
-						disabled>
+						value={apiConfiguration.geminiCliProjectId}>
 						<span style={{ fontWeight: 500 }}>Discovered Project ID</span>
 					</VSCodeTextField>
 					<p
@@ -103,8 +103,8 @@ export const GeminiCliProvider = ({ showModelOptions, isPopup, currentMode }: Ge
 			{showModelOptions && (
 				<>
 					<ModelSelector
+						label="Model"
 						models={geminiCliModels}
-						selectedModelId={selectedModelId}
 						onChange={(e) =>
 							handleModeFieldChange(
 								{ plan: "planModeApiModelId", act: "actModeApiModelId" },
@@ -112,14 +112,14 @@ export const GeminiCliProvider = ({ showModelOptions, isPopup, currentMode }: Ge
 								currentMode,
 							)
 						}
-						label="Model"
+						selectedModelId={selectedModelId}
 					/>
 
 					{SUPPORTED_THINKING_MODELS.includes(selectedModelId) && (
-						<ThinkingBudgetSlider maxBudget={selectedModelInfo.thinkingConfig?.maxBudget} currentMode={currentMode} />
+						<ThinkingBudgetSlider currentMode={currentMode} maxBudget={selectedModelInfo.thinkingConfig?.maxBudget} />
 					)}
 
-					<ModelInfoView selectedModelId={selectedModelId} modelInfo={selectedModelInfo} isPopup={isPopup} />
+					<ModelInfoView isPopup={isPopup} modelInfo={selectedModelInfo} selectedModelId={selectedModelId} />
 				</>
 			)}
 
@@ -165,8 +165,7 @@ export const GeminiCliProvider = ({ showModelOptions, isPopup, currentMode }: Ge
 					<br />• Then, run <strong>gemini</strong> in your terminal and make sure you{" "}
 					<strong>Log in with Google</strong>
 					<br />• Only works with <strong>personal Google accounts</strong> (not Google Workspace accounts)
-					<br />
-					• Does not use API keys - authentication is handled via OAuth
+					<br />• Does not use API keys - authentication is handled via OAuth
 					<br />• Requires the Gemini CLI tool to be installed and authenticated first
 				</p>
 			</div>
