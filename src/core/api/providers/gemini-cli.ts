@@ -20,17 +20,17 @@
  */
 
 import type { Anthropic } from "@anthropic-ai/sdk"
-import { OAuth2Client } from "google-auth-library"
+import { ApiHandlerOptions, GeminiCliModelId, geminiCliDefaultModelId, geminiCliModels, ModelInfo } from "@shared/api"
 import fs from "fs/promises"
-import path from "path"
+import { OAuth2Client } from "google-auth-library"
 import os from "os"
+import path from "path"
 import * as readline from "readline"
 import { Readable } from "stream"
 import { ApiHandler } from ".."
-import { ApiHandlerOptions, GeminiCliModelId, geminiCliModels, ModelInfo, geminiCliDefaultModelId } from "@shared/api"
+import { withRetry } from "../retry"
 import { convertAnthropicMessageToGemini } from "../transform/gemini-format"
 import { ApiStream } from "../transform/stream"
-import { withRetry } from "../retry"
 
 const CODE_ASSIST_ENDPOINT = "https://cloudcode-pa.googleapis.com"
 const CODE_ASSIST_API_VERSION = "v1internal"
