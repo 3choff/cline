@@ -1,5 +1,6 @@
 import { StringRequest } from "@shared/proto/cline/common"
 import { Mode } from "@shared/storage/types"
+import { VSCodeTextField } from "@vscode/webview-ui-toolkit/react"
 import Fuse from "fuse.js"
 import { KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useInterval } from "react-use"
@@ -21,6 +22,7 @@ import { DeepSeekProvider } from "./providers/DeepSeekProvider"
 import { DifyProvider } from "./providers/DifyProvider"
 import { DoubaoProvider } from "./providers/DoubaoProvider"
 import { FireworksProvider } from "./providers/FireworksProvider"
+import { GeminiCliProvider } from "./providers/GeminiCliProvider"
 import { GeminiProvider } from "./providers/GeminiProvider"
 import { GroqProvider } from "./providers/GroqProvider"
 import { HuaweiCloudMaasProvider } from "./providers/HuaweiCloudMaasProvider"
@@ -38,7 +40,6 @@ import { OpenRouterProvider } from "./providers/OpenRouterProvider"
 import { QwenCodeProvider } from "./providers/QwenCodeProvider"
 import { QwenProvider } from "./providers/QwenProvider"
 import { RequestyProvider } from "./providers/RequestyProvider"
-import { GeminiCliProvider } from "./providers/GeminiCliProvider"
 import { SambanovaProvider } from "./providers/SambanovaProvider"
 import { SapAiCoreProvider } from "./providers/SapAiCoreProvider"
 import { TogetherProvider } from "./providers/TogetherProvider"
@@ -129,6 +130,7 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 			{ value: "cline", label: "Cline" },
 			{ value: "openrouter", label: "OpenRouter" },
 			{ value: "gemini", label: "Google Gemini" },
+			{ value: "gemini-cli", label: "Gemini CLI" },
 			{ value: "openai", label: "OpenAI Compatible" },
 			{ value: "anthropic", label: "Anthropic" },
 			{ value: "bedrock", label: "Amazon Bedrock" },
@@ -428,11 +430,7 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 			)}
 
 			{apiConfiguration && selectedProvider === "gemini-cli" && (
-				<GeminiCliProvider showModelOptions={showModelOptions} isPopup={isPopup} currentMode={currentMode} />
-			)}
-
-			{apiConfiguration && selectedProvider === "gemini-cli" && (
-				<GeminiCliProvider showModelOptions={showModelOptions} isPopup={isPopup} currentMode={currentMode} />
+				<GeminiCliProvider currentMode={currentMode} isPopup={isPopup} showModelOptions={showModelOptions} />
 			)}
 
 			{apiConfiguration && selectedProvider === "requesty" && (
