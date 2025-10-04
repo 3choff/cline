@@ -29,6 +29,7 @@ import { FileServiceClient, TaskServiceClient, UiServiceClient } from "@/service
 import { findMatchingResourceOrTemplate, getMcpServerDisplayName } from "@/utils/mcp"
 import { CheckpointControls } from "../common/CheckpointControls"
 import CodeAccordian, { cleanPathPrefix } from "../common/CodeAccordian"
+import CreditLimitError from "./CreditLimitError"
 import { ErrorBlockTitle } from "./ErrorBlockTitle"
 import ErrorRow from "./ErrorRow"
 import NewTaskPreview from "./NewTaskPreview"
@@ -36,7 +37,6 @@ import QuoteButton from "./QuoteButton"
 import ReportBugPreview from "./ReportBugPreview"
 import SearchResultsDisplay from "./SearchResultsDisplay"
 import UserMessage from "./UserMessage"
-import CreditLimitError from "./CreditLimitError"
 
 declare global {
 	interface Window {
@@ -155,7 +155,7 @@ export const ChatRowContent = memo(
 		sendMessageFromChatRow,
 		onSetQuote,
 	}: ChatRowContentProps) => {
-		const { mcpServers, mcpMarketplaceCatalog, onRelinquishControl } = useExtensionState()
+		const { mcpServers, mcpMarketplaceCatalog, onRelinquishControl, apiConfiguration } = useExtensionState()
 		const [seeNewChangesDisabled, setSeeNewChangesDisabled] = useState(false)
 		const [quoteButtonState, setQuoteButtonState] = useState<QuoteButtonState>({
 			visible: false,
@@ -945,7 +945,7 @@ export const ChatRowContent = memo(
 									<>
 										{(() => {
 											// Try to parse the error message as JSON for credit limit error
-											let errorData: any = undefined
+											let errorData: any
 											try {
 												errorData = apiRequestFailedMessage
 													? JSON.parse(apiRequestFailedMessage)
@@ -964,9 +964,9 @@ export const ChatRowContent = memo(
 												return (
 													<CreditLimitError
 														currentBalance={errorData.current_balance}
-														totalSpent={errorData.total_spent}
-														totalPromotions={errorData.total_promotions}
 														message={errorData.message}
+														totalPromotions={errorData.total_promotions}
+														totalSpent={errorData.total_spent}
 													/>
 												)
 											}
@@ -1028,10 +1028,6 @@ export const ChatRowContent = memo(
 																You can read about the tier limits{" "}
 																<a
 																	href="https://codeassist.google/"
-																	style={{
-																		color: "inherit",
-																		textDecoration: "underline",
-																	}}
 																	onClick={(e) => {
 																		e.preventDefault()
 																		if (window.UiServiceClient) {
@@ -1039,6 +1035,10 @@ export const ChatRowContent = memo(
 																				value: "https://codeassist.google/",
 																			})
 																		}
+																	}}
+																	style={{
+																		color: "inherit",
+																		textDecoration: "underline",
 																	}}>
 																	here
 																</a>
@@ -1064,10 +1064,10 @@ export const ChatRowContent = memo(
 											// Default generic error rendering
 											return (
 												<ErrorRow
-													message={message}
-													errorType="error"
-													apiRequestFailedMessage={apiRequestFailedMessage}
 													apiReqStreamingFailedMessage={apiReqStreamingFailedMessage}
+													apiRequestFailedMessage={apiRequestFailedMessage}
+													errorType="error"
+													message={message}
 												/>
 											)
 										})()}
