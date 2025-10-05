@@ -73,8 +73,14 @@ async function compileProtos() {
 		log_verbose(chalk.cyan("Generating descriptor set..."))
 		execSync(descriptorProtocCommand, { stdio: "inherit" })
 	} catch (error) {
-		console.error(chalk.red("Error generating descriptor set for proto file:"), error)
-		process.exit(1)
+		if (isWindows && error.status === 0xc0000135) {
+			const fallbackDescriptorCommand = descriptorProtocCommand.replace(PROTOC, "protoc")
+			log_verbose(chalk.yellow("Bundled protoc failed to run; retrying with system protoc"))
+			execSync(fallbackDescriptorCommand, { stdio: "inherit" })
+		} else {
+			console.error(chalk.red("Error generating descriptor set for proto file:"), error)
+			process.exit(1)
+		}
 	}
 
 	log_verbose(chalk.green("Protocol Buffer code generation completed successfully."))
@@ -96,8 +102,14 @@ async function tsProtoc(outDir, protoFiles, protoOptions) {
 		log_verbose(command)
 		execSync(command, { stdio: "inherit" })
 	} catch (error) {
-		console.error(chalk.red("Error generating TypeScript for proto files:"), error)
-		process.exit(1)
+		if (isWindows && error.status === 0xc0000135) {
+			const fallbackCommand = command.replace(PROTOC, "protoc")
+			log_verbose(chalk.yellow("Bundled protoc failed to run; retrying with system protoc"))
+			execSync(fallbackCommand, { stdio: "inherit" })
+		} else {
+			console.error(chalk.red("Error generating TypeScript for proto files:"), error)
+			process.exit(1)
+		}
 	}
 }
 
