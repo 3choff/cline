@@ -509,6 +509,18 @@ export const geminiCliModels = {
 			maxBudget: 32767,
 		},
 	},
+	"gemini-3-pro-preview": {
+		maxTokens: 65536,
+		contextWindow: 1_048_576,
+		supportsImages: true,
+		supportsPromptCache: false,
+		inputPrice: 0, // Free tier via OAuth
+		outputPrice: 0, // Free tier via OAuth
+		description: "Google's Gemini 3 Pro Preview model via OAuth (free tier)",
+		thinkingConfig: {
+			maxBudget: 32767,
+		},
+	},
 	"gemini-2.5-flash": {
 		maxTokens: 65536,
 		contextWindow: 1_048_576,
