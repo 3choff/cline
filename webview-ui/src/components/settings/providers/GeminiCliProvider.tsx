@@ -23,7 +23,7 @@ import { normalizeApiConfiguration } from "../utils/providerUtils"
 import { useApiConfigurationHandlers } from "../utils/useApiConfigurationHandlers"
 
 // Gemini models that support thinking/reasoning mode
-const SUPPORTED_THINKING_MODELS = ["gemini-2.5-pro", "gemini-2.5-flash"]
+const SUPPORTED_THINKING_MODELS = ["gemini-2.5-pro", "gemini-3-pro-preview", "gemini-2.5-flash"]
 
 interface GeminiCliProviderProps {
 	showModelOptions: boolean
