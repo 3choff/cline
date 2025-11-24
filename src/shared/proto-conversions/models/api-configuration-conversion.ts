@@ -498,7 +498,7 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		aihubmixAppCode: config.aihubmixAppCode,
 		hicapApiKey: config.hicapApiKey,
 		hicapModelId: config.hicapModelId,
-		geminiCliOAuthPath: config.geminiCliOAuthPath,
+		geminiCliOauthPath: config.geminiCliOAuthPath,
 		geminiCliProjectId: config.geminiCliProjectId,
 
 		// Plan mode configurations
@@ -667,7 +667,7 @@ export function convertProtoToApiConfiguration(protoConfig: ProtoApiConfiguratio
 		hicapApiKey: protoConfig.hicapApiKey,
 		hicapModelId: protoConfig.hicapModelId,
 		nousResearchApiKey: protoConfig.nousResearchApiKey,
-		geminiCliOAuthPath: protoConfig.geminiCliOAuthPath,
+		geminiCliOAuthPath: protoConfig.geminiCliOauthPath,
 		geminiCliProjectId: protoConfig.geminiCliProjectId,
 
 		// Plan mode configurations

@@ -511,6 +511,8 @@ export class StateManager {
 			anthropicBaseUrl,
 			geminiApiKey,
 			geminiBaseUrl,
+			geminiCliOAuthPath,
+			geminiCliProjectId,
 			openAiNativeApiKey,
 			deepSeekApiKey,
 			requestyApiKey,
@@ -743,6 +745,8 @@ export class StateManager {
 			lmStudioMaxTokens,
 			anthropicBaseUrl,
 			geminiBaseUrl,
+			geminiCliOAuthPath,
+			geminiCliProjectId,
 			azureApiVersion,
 			openRouterProviderSorting,
 			liteLlmBaseUrl,
@@ -1168,6 +1172,8 @@ export class StateManager {
 			lmStudioMaxTokens: this.taskStateCache["lmStudioMaxTokens"] || this.globalStateCache["lmStudioMaxTokens"],
 			anthropicBaseUrl: this.taskStateCache["anthropicBaseUrl"] || this.globalStateCache["anthropicBaseUrl"],
 			geminiBaseUrl: this.taskStateCache["geminiBaseUrl"] || this.globalStateCache["geminiBaseUrl"],
+			geminiCliOAuthPath: this.taskStateCache["geminiCliOAuthPath"] || this.globalStateCache["geminiCliOAuthPath"],
+			geminiCliProjectId: this.taskStateCache["geminiCliProjectId"] || this.globalStateCache["geminiCliProjectId"],
 			azureApiVersion:
 				this.remoteConfigCache["azureApiVersion"] ||
 				this.taskStateCache["azureApiVersion"] ||
