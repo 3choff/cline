@@ -78,6 +78,8 @@ export interface Settings {
 	lmStudioMaxTokens: string | undefined
 	anthropicBaseUrl: string | undefined
 	geminiBaseUrl: string | undefined
+	geminiCliOAuthPath: string | undefined
+	geminiCliProjectId: string | undefined
 	azureApiVersion: string | undefined
 	openRouterProviderSorting: string | undefined
 	autoApprovalSettings: AutoApprovalSettings

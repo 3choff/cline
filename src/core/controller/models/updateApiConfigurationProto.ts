@@ -30,6 +30,9 @@ export async function updateApiConfigurationProto(
 
 		const convertedApiConfigurationFromProto = {
 			...protoApiConfiguration,
+			// Normalize Gemini CLI field names to match ApiConfiguration (OAuth vs Oauth)
+			geminiCliOAuthPath: protoApiConfiguration.geminiCliOauthPath,
+			geminiCliProjectId: protoApiConfiguration.geminiCliProjectId,
 			// Convert proto ApiProvider enums to native string types
 			planModeApiProvider:
 				protoApiConfiguration.planModeApiProvider !== undefined

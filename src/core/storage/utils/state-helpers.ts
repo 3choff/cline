@@ -282,6 +282,8 @@ export async function readGlobalStateFromDisk(context: ExtensionContext): Promis
 		const hicapModelId = context.globalState.get<GlobalStateAndSettings["hicapModelId"]>("hicapModelId")
 		const aihubmixBaseUrl = context.globalState.get<GlobalStateAndSettings["aihubmixBaseUrl"]>("aihubmixBaseUrl")
 		const aihubmixAppCode = context.globalState.get<GlobalStateAndSettings["aihubmixAppCode"]>("aihubmixAppCode")
+		const geminiCliOAuthPath = context.globalState.get<GlobalStateAndSettings["geminiCliOAuthPath"]>("geminiCliOAuthPath")
+		const geminiCliProjectId = context.globalState.get<GlobalStateAndSettings["geminiCliProjectId"]>("geminiCliProjectId")
 
 		// OpenTelemetry configuration
 		const openTelemetryEnabled =
@@ -529,6 +531,8 @@ export async function readGlobalStateFromDisk(context: ExtensionContext): Promis
 			lmStudioMaxTokens,
 			anthropicBaseUrl,
 			geminiBaseUrl,
+			geminiCliOAuthPath,
+			geminiCliProjectId,
 			qwenApiLine,
 			moonshotApiLine,
 			zaiApiLine,
