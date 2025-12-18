@@ -519,18 +519,6 @@ export const claudeCodeModels = {
 export type GeminiCliModelId = keyof typeof geminiCliModels
 export const geminiCliDefaultModelId: GeminiCliModelId = "gemini-2.5-flash"
 export const geminiCliModels = {
-	"gemini-2.5-pro": {
-		maxTokens: 65536,
-		contextWindow: 1_048_576,
-		supportsImages: true,
-		supportsPromptCache: false,
-		inputPrice: 0, // Free tier via OAuth
-		outputPrice: 0, // Free tier via OAuth
-		description: "Google's Gemini 2.5 Pro model via OAuth (free tier)",
-		thinkingConfig: {
-			maxBudget: 32767,
-		},
-	},
 	"gemini-3-pro-preview": {
 		maxTokens: 65536,
 		contextWindow: 1_048_576,
@@ -539,8 +527,11 @@ export const geminiCliModels = {
 		inputPrice: 0, // Free tier via OAuth
 		outputPrice: 0, // Free tier via OAuth
 		description: "Google's Gemini 3 Pro Preview model via OAuth (free tier)",
+		supportsReasoning: true,
+		temperature: 1.0,
 		thinkingConfig: {
-			maxBudget: 32767,
+			geminiThinkingLevel: "high",
+			supportsThinkingLevel: true,
 		},
 	},
 	"gemini-3-flash-preview": {
@@ -551,6 +542,21 @@ export const geminiCliModels = {
 		inputPrice: 0, // Free tier via OAuth
 		outputPrice: 0, // Free tier via OAuth
 		description: "Google's Gemini 3 Flash Preview model via OAuth (free tier)",
+		supportsReasoning: true,
+		temperature: 1.0,
+		thinkingConfig: {
+			geminiThinkingLevel: "low",
+			supportsThinkingLevel: true,
+		},
+	},
+	"gemini-2.5-pro": {
+		maxTokens: 65536,
+		contextWindow: 1_048_576,
+		supportsImages: true,
+		supportsPromptCache: false,
+		inputPrice: 0, // Free tier via OAuth
+		outputPrice: 0, // Free tier via OAuth
+		description: "Google's Gemini 2.5 Pro model via OAuth (free tier)",
 		thinkingConfig: {
 			maxBudget: 32767,
 		},

@@ -55,6 +55,7 @@ interface GeminiCliHandlerOptions extends ApiHandlerOptions {
 	geminiCliProjectId?: string
 	apiModelId?: string
 	thinkingBudgetTokens?: number
+	thinkingLevel?: string
 }
 
 /**
@@ -313,17 +314,27 @@ export class GeminiCliHandler implements ApiHandler {
 					...contents,
 				],
 				generationConfig: {
-					temperature: 0, // Default temperature, original was 0.7
+					temperature: modelInfo.temperature ?? 0, // Default temperature, original was 0.7
 					// maxOutputTokens: modelInfo.maxTokens || 8192,
 				},
 			},
 		}
 
-		// Add thinking config if the model supports it
-		if (this.options.thinkingBudgetTokens && this.options.thinkingBudgetTokens > 0) {
+		// Configure thinking config if supported
+		if (modelInfo.thinkingConfig) {
+			const _thinkingBudget = this.options.thinkingBudgetTokens ?? 0
+			const maxBudget = modelInfo.thinkingConfig.maxBudget ?? 32767
+			const thinkingBudget = Math.min(_thinkingBudget, maxBudget)
+
+			let thinkingLevel: string | undefined
+			if (modelInfo.thinkingConfig.supportsThinkingLevel) {
+				thinkingLevel = this.options.thinkingLevel || modelInfo.thinkingConfig.geminiThinkingLevel
+			}
+
 			streamRequest.request.generationConfig.thinkingConfig = {
-				thinkingBudget: this.options.thinkingBudgetTokens,
-				includeThoughts: true,
+				thinkingBudget: thinkingLevel ? undefined : thinkingBudget > 0 ? thinkingBudget : undefined,
+				thinkingLevel,
+				includeThoughts: thinkingBudget > 0 || !!thinkingLevel,
 			}
 		}
 

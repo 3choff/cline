@@ -15,6 +15,7 @@ import { DifyHandler } from "./providers/dify"
 import { DoubaoHandler } from "./providers/doubao"
 import { FireworksHandler } from "./providers/fireworks"
 import { GeminiHandler } from "./providers/gemini"
+import { GeminiCliHandler } from "./providers/gemini-cli"
 import { GroqHandler } from "./providers/groq"
 import { HicapHandler } from "./providers/hicap"
 import { HuaweiCloudMaaSHandler } from "./providers/huawei-cloud-maas"
@@ -29,7 +30,6 @@ import { NousResearchHandler } from "./providers/nousresearch"
 import { OcaHandler } from "./providers/oca"
 import { OllamaHandler } from "./providers/ollama"
 import { OpenAiHandler } from "./providers/openai"
-import { GeminiCliHandler } from "./providers/gemini-cli"
 import { OpenAiNativeHandler } from "./providers/openai-native"
 import { OpenRouterHandler } from "./providers/openrouter"
 import { QwenHandler } from "./providers/qwen"
@@ -182,6 +182,7 @@ function createHandlerForProvider(
 				apiModelId: mode === "plan" ? options.planModeApiModelId : options.actModeApiModelId,
 				thinkingBudgetTokens:
 					mode === "plan" ? options.planModeThinkingBudgetTokens : options.actModeThinkingBudgetTokens,
+				thinkingLevel: mode === "plan" ? options.geminiPlanModeThinkingLevel : options.geminiActModeThinkingLevel,
 			})
 		case "openai-native":
 			return new OpenAiNativeHandler({

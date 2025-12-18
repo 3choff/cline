@@ -13,11 +13,11 @@
 
 import { geminiCliModels } from "@shared/api"
 import { Mode } from "@shared/storage/types"
-import { VSCodeLink, VSCodeTextField } from "@vscode/webview-ui-toolkit/react"
+import { VSCodeDropdown, VSCodeLink, VSCodeOption, VSCodeTextField } from "@vscode/webview-ui-toolkit/react"
 import { memo } from "react"
 import { useExtensionState } from "@/context/ExtensionStateContext"
 import { ModelInfoView } from "../common/ModelInfoView"
-import { ModelSelector } from "../common/ModelSelector"
+import { DropdownContainer, ModelSelector } from "../common/ModelSelector"
 import ThinkingBudgetSlider from "../ThinkingBudgetSlider"
 import { normalizeApiConfiguration } from "../utils/providerUtils"
 import { useApiConfigurationHandlers } from "../utils/useApiConfigurationHandlers"
@@ -115,8 +115,40 @@ export const GeminiCliProvider = ({ showModelOptions, isPopup, currentMode }: Ge
 						selectedModelId={selectedModelId}
 					/>
 
-					{SUPPORTED_THINKING_MODELS.includes(selectedModelId) && (
-						<ThinkingBudgetSlider currentMode={currentMode} maxBudget={selectedModelInfo.thinkingConfig?.maxBudget} />
+					{SUPPORTED_THINKING_MODELS.includes(selectedModelId) &&
+						!selectedModelInfo.thinkingConfig?.geminiThinkingLevel && (
+							<ThinkingBudgetSlider
+								currentMode={currentMode}
+								maxBudget={selectedModelInfo.thinkingConfig?.maxBudget}
+							/>
+						)}
+
+					{selectedModelInfo.thinkingConfig?.supportsThinkingLevel && (
+						<DropdownContainer className="dropdown-container" style={{ marginTop: "8px" }} zIndex={1}>
+							<label htmlFor="thinking-level">
+								<span className="font-bold">Thinking Level</span>
+							</label>
+							<VSCodeDropdown
+								className="w-full"
+								id="thinking-level"
+								onChange={(e: any) =>
+									handleModeFieldChange(
+										{ plan: "geminiPlanModeThinkingLevel", act: "geminiActModeThinkingLevel" },
+										e.target.value,
+										currentMode,
+									)
+								}
+								value={
+									(currentMode === "plan"
+										? apiConfiguration?.geminiPlanModeThinkingLevel
+										: apiConfiguration?.geminiActModeThinkingLevel) || "high"
+								}>
+								<VSCodeOption value="minimal">Minimal</VSCodeOption>
+								<VSCodeOption value="low">Low</VSCodeOption>
+								<VSCodeOption value="medium">Medium</VSCodeOption>
+								<VSCodeOption value="high">High</VSCodeOption>
+							</VSCodeDropdown>
+						</DropdownContainer>
 					)}
 
 					<ModelInfoView isPopup={isPopup} modelInfo={selectedModelInfo} selectedModelId={selectedModelId} />
